@@ -62,6 +62,7 @@
 
     <script>
       const API_BASE = "http://localhost:3000"; // 後端網址／port
+      const CITY_STORAGE_KEY = "selectedCity"; // 🔑 記錄上次選擇的 key
 
       // ✅ 台灣各縣市基準座標（約略中心點即可）
       const CITY_COORDS = [
@@ -91,13 +92,14 @@
 
       const DEFAULT_CITY = "臺北市";
 
-      // ✅ 頁面載入：先把下拉選單塞選項，然後做定位
+      // ✅ 頁面載入：先把下拉選單塞選項，再處理「上次選擇」與定位
       window.addEventListener("load", () => {
         const statusEl = document.getElementById("status");
         const locationEl = document.getElementById("location");
         const citySelect = document.getElementById("citySelect");
 
         // 1. 填入所有縣市選項
+        citySelect.innerHTML = ""; // 清空原本的「自動偵測中...」
         CITY_COORDS.forEach((c) => {
           const opt = document.createElement("option");
           opt.value = c.name;
@@ -105,21 +107,64 @@
           citySelect.appendChild(opt);
         });
 
-        // 2. 綁定「手動選縣市」事件
+        // 2. 查看 localStorage 是否有儲存的縣市
+        const savedCity = localStorage.getItem(CITY_STORAGE_KEY);
+        const isSavedCityValid = CITY_COORDS.some(
+          (c) => c.name === savedCity
+        );
+
+        if (savedCity && isSavedCityValid) {
+          // 🎯 有上次選擇的縣市 → 直接用它，不用再自動偵測
+          citySelect.value = savedCity;
+          statusEl.textContent = `已載入上次選擇的縣市：${savedCity}`;
+          fetchWeatherByCity(savedCity);
+
+          // 額外：有支援定位的話，只是顯示座標，不改變城市
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const { latitude, longitude } = position.coords;
+                locationEl.textContent = `座標：${latitude.toFixed(
+                  4
+                )}, ${longitude.toFixed(4)}`;
+              },
+              (error) => {
+                console.warn("取得定位失敗（僅用於顯示）：", error);
+              }
+            );
+          }
+        } else {
+          // 🧭 沒有儲存紀錄 → 用定位 + 最近縣市
+          autoDetectCityWithGeolocation(
+            statusEl,
+            locationEl,
+            citySelect
+          );
+        }
+
+        // 3. 綁定「手動選縣市」事件：更新畫面 + localStorage
         citySelect.addEventListener("change", (e) => {
           const city = e.target.value;
           if (!city) return;
           statusEl.textContent = `已選擇：${city}`;
+          localStorage.setItem(CITY_STORAGE_KEY, city); // 🔐 存起來
           fetchWeatherByCity(city);
         });
+      });
 
-        // 3. 取定位，算最近縣市
+      // ✅ 用定位自動選最近縣市，並記住選擇
+      function autoDetectCityWithGeolocation(
+        statusEl,
+        locationEl,
+        citySelect
+      ) {
         if (!navigator.geolocation) {
           statusEl.textContent =
             "此瀏覽器不支援定位功能，改用預設城市（" +
             DEFAULT_CITY +
             "）。";
           citySelect.value = DEFAULT_CITY;
+          localStorage.setItem(CITY_STORAGE_KEY, DEFAULT_CITY);
           fetchWeatherByCity(DEFAULT_CITY);
           return;
         }
@@ -139,12 +184,14 @@
               statusEl.textContent +=
                 "（無法判斷最近縣市，改用 " + DEFAULT_CITY + "）";
               citySelect.value = DEFAULT_CITY;
+              localStorage.setItem(CITY_STORAGE_KEY, DEFAULT_CITY);
               fetchWeatherByCity(DEFAULT_CITY);
               return;
             }
 
             statusEl.textContent += `（最近縣市：${nearest.name}）`;
             citySelect.value = nearest.name;
+            localStorage.setItem(CITY_STORAGE_KEY, nearest.name); // 🔐 存起來
             fetchWeatherByCity(nearest.name);
           },
           (error) => {
@@ -154,12 +201,13 @@
               DEFAULT_CITY +
               "）。";
             citySelect.value = DEFAULT_CITY;
+            localStorage.setItem(CITY_STORAGE_KEY, DEFAULT_CITY); // 🔐 存起來
             fetchWeatherByCity(DEFAULT_CITY);
           }
         );
-      });
+      }
 
-      // ✅ 使用簡單「平面距離」找最近縣市（台灣範圍內已經夠用）
+      // ✅ 使用簡單「平面距離」找最近縣市
       function getNearestCity(lat, lng) {
         let nearest = null;
         let minDist = Infinity;
@@ -185,7 +233,9 @@
 
         try {
           const res = await fetch(
-            `${API_BASE}/api/weather?city=${encodeURIComponent(city)}`
+            `${API_BASE}/api/weather?city=${encodeURIComponent(
+              city
+            )}`
           );
 
           if (!res.ok) {
