@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:3000"; // 後端網址／port
+// ✅ 如果前端也是在本機，後端開在 3000 port，這樣寫就好
+const API_BASE = "http://127.0.0.1:3000";
 const DEFAULT_CITY = "臺北市";
 
 // 台灣各縣市基準座標（約略中心點）
@@ -27,13 +28,13 @@ const CITY_COORDS = [
   { name: "屏東縣", lat: 22.6828017, lng: 120.487928 },
 ];
 
-// 頁面載入：初始化選單 + 自動偵測
+// 頁面載入
 window.addEventListener("load", () => {
   const statusEl = document.getElementById("status");
   const locationEl = document.getElementById("location");
   const citySelect = document.getElementById("citySelect");
 
-  // 1. 填入所有縣市選項
+  // 先把縣市選單建立好，但先 disable，等健康檢查通過再啟用
   citySelect.innerHTML = "";
   CITY_COORDS.forEach((c) => {
     const opt = document.createElement("option");
@@ -42,7 +43,6 @@ window.addEventListener("load", () => {
     citySelect.appendChild(opt);
   });
 
-  // 2. 手動選縣市事件
   citySelect.addEventListener("change", (e) => {
     const city = e.target.value;
     if (!city) return;
@@ -50,9 +50,57 @@ window.addEventListener("load", () => {
     fetchWeatherByCity(city);
   });
 
-  // 3. 自動偵測最近縣市
-  autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
+  // ✅ 第一步：打 /api/health 看前端到底連不連得到後端
+  testBackendHealth().then((ok) => {
+    if (!ok) {
+      // 如果 health 都失敗，就不要再往下跑了
+      citySelect.disabled = true;
+      return;
+    }
+
+    citySelect.disabled = false;
+    statusEl.textContent = "伺服器連線正常，正在取得您的位置...";
+
+    // ✅ 第二步：伺服器 OK，再做自動定位
+    autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
+  });
 });
+
+// 檢查 /api/health
+async function testBackendHealth() {
+  const statusEl = document.getElementById("status");
+  const weatherEl = document.getElementById("weather");
+
+  const url = `${API_BASE}/api/health`;
+  console.log("健康檢查 URL:", url);
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("健康檢查 HTTP 錯誤：", res.status, text);
+      statusEl.textContent =
+        "無法連線到伺服器（/api/health HTTP " + res.status + "）。";
+      weatherEl.innerHTML =
+        '<div class="error">健康檢查失敗，請確認後端網址與 port。</div>';
+      return false;
+    }
+
+    const json = await res.json();
+    console.log("健康檢查回傳：", json);
+    statusEl.textContent = "伺服器連線正常。";
+    return true;
+  } catch (err) {
+    console.error("健康檢查發生錯誤：", err);
+    statusEl.textContent = "無法連線到伺服器（health）。";
+    const weatherEl = document.getElementById("weather");
+    weatherEl.innerHTML =
+      '<div class="error">無法連線到伺服器（health）：' +
+      (err.message || err) +
+      "</div>";
+    return false;
+  }
+}
 
 // 用定位自動選最近縣市
 function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
@@ -97,7 +145,7 @@ function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
   );
 }
 
-// 使用簡單平方距離找最近縣市
+// 使用平方距離找最近縣市
 function getNearestCity(lat, lng) {
   let nearest = null;
   let minDist = Infinity;
@@ -116,15 +164,16 @@ function getNearestCity(lat, lng) {
   return nearest;
 }
 
-// 呼叫後端 /api/weather?city=xxx
+// 呼叫 /api/weather?city=xxx
 async function fetchWeatherByCity(city) {
   const weatherEl = document.getElementById("weather");
+  const url = `${API_BASE}/api/weather?city=${encodeURIComponent(city)}`;
+  console.log("天氣查詢 URL:", url);
+
   weatherEl.innerHTML = `正在載入 ${city} 的天氣資料...`;
 
   try {
-    const res = await fetch(
-      `${API_BASE}/api/weather?city=${encodeURIComponent(city)}`
-    );
+    const res = await fetch(url);
 
     if (!res.ok) {
       const text = await res.text();
@@ -139,7 +188,7 @@ async function fetchWeatherByCity(city) {
     const json = await res.json();
     console.log("weather API 回傳：", json);
 
-    // ⚠️ 假設後端格式為 { success: true, data: {...} }
+    // 後端格式：{ success: true, data: {...} }
     if (!json.success) {
       weatherEl.innerHTML =
         '<div class="error">取得天氣失敗：' +
@@ -153,7 +202,9 @@ async function fetchWeatherByCity(city) {
   } catch (err) {
     console.error("fetchWeatherByCity 發生錯誤：", err);
     weatherEl.innerHTML =
-      '<div class="error">無法連線到伺服器，請確認後端是否有啟動。</div>';
+      '<div class="error">無法連線到伺服器（weather）：' +
+      (err.message || err) +
+      "</div>";
   }
 }
 
