@@ -62,10 +62,27 @@ function getComfortCuteText(comfort) {
   return "今天的天氣有自己的個性，照自己的步調，好好過一天吧 🌈";
 }
 
+// 背景主題：依時間切換白天/夜間
+function applyBackgroundTheme() {
+  const hour = new Date().getHours();
+  const body = document.body;
+
+  body.classList.remove("theme-day", "theme-night");
+
+  // 06:00 ~ 18:00 視為白天，其餘視為夜間
+  if (hour >= 6 && hour < 18) {
+    body.classList.add("theme-day");
+  } else {
+    body.classList.add("theme-night");
+  }
+}
+
 // D3 地圖：縣市名稱 -> path id
 const countyNameToIdMap = {};
 
 window.addEventListener("load", () => {
+  applyBackgroundTheme();  // ✅ 依時間套用背景主題
+
   const statusEl = document.getElementById("status");
   const locationEl = document.getElementById("location");
   const citySelect = document.getElementById("citySelect");
