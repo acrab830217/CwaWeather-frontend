@@ -303,7 +303,7 @@ function initModalEvents() {
   });
 }
 
-/* ====== D3 台灣地圖 ====== */
+/* ====== D3 台灣地圖（使用 bounds 自動 fit） ====== */
 function initTaiwanMap() {
   const mapBox = document.getElementById("taiwanMap");
   if (!mapBox || typeof d3 === "undefined") {
@@ -320,29 +320,15 @@ function initTaiwanMap() {
     .attr("height", height)
     .attr("viewBox", "0 0 " + width + " " + height);
 
-  // 從 letswrite 教學借來的 scale 判斷
-  let mercatorScale;
-  const w = window.screen.width;
-  if (w > 1366) {
-    mercatorScale = 11000;
-  } else if (w <= 1366 && w > 480) {
-    mercatorScale = 9000;
-  } else {
-    mercatorScale = 6000;
-  }
+  // 先給一個基本的投影（scale=1, translate=[0,0]），等拿到 GeoJSON 再 fit
+  const projection = d3.geo
+    .mercator()
+    .center([121, 24])
+    .scale(1)
+    .translate([0, 0]);
 
-  // 座標變換函式
-  const path = d3.geo
-    .path()
-    .projection(
-      d3.geo
-        .mercator()
-        .center([121, 24])
-        .scale(mercatorScale)
-        .translate([width / 2, height / 2.5])
-    );
+  const path = d3.geo.path().projection(projection);
 
-  // letswrite demo 的 GeoJSON 檔案
   const url =
     "https://letswritetw.github.io/letswrite-taiwan-map-basic/dist/taiwan.geojson";
 
@@ -351,6 +337,22 @@ function initTaiwanMap() {
       console.error("載入台灣 GeoJSON 失敗：", error);
       return;
     }
+
+    // ✅ 用 bounds 自動算 scale + translate，確保整個台灣完整出現在畫面內
+    const b = path.bounds(geometry);
+    const s =
+      0.95 /
+      Math.max(
+        (b[1][0] - b[0][0]) / width,
+        (b[1][1] - b[0][1]) / height
+      );
+    const t = [
+      (width - s * (b[1][0] + b[0][0])) / 2,
+      (height - s * (b[1][1] + b[0][1])) / 2,
+    ];
+
+    projection.scale(s).translate(t);
+    path.projection(projection);
 
     svg
       .selectAll("path")
