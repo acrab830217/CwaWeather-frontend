@@ -198,7 +198,7 @@ h1 {
 .card {
   background-color: var(--card-bg);
   border-radius: 18px;
-  padding: 14px 14px 10px;
+  padding: 14px 14px 18px;  /* ✅ 底部多留一點空間 */
   border: 3px solid #111827;
   box-shadow: 0 8px 0 #0f172a;
   position: relative;
@@ -585,15 +585,11 @@ h1 {
 }
 
 /* ===== 資料來源說明 ===== */
-.summary-card {
-  margin-bottom: 4px; /* 原本是 8px，稍微縮小一點給來源文字空間 */
-}
-
 .source-note {
-  margin-top: 4px;
-  font-size: 10px;
+  margin-top: 12px;        /* ✅ 拉開和卡片的距離，避免壓在裝飾上 */
+  font-size: 11px;
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: 1.6;        /* ✅ 行距拉開，可讀性更好 */
 }
 
 .source-note a {
