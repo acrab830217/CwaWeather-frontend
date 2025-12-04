@@ -6,7 +6,7 @@
     <!-- SEO 描述：50–160 字元之間 -->
     <meta
       name="description"
-      content="自動偵測所在縣市並顯示台灣各地 36 小時天氣預報，支援記住上次選擇與手動切換縣市的簡易查詢工具。"
+      content="自動偵測所在縣市並顯示台灣各地 36 小時天氣預報，支援手動切換縣市的簡易查詢工具。"
     />
     <!-- 響應式視窗設定 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -148,7 +148,7 @@
 
     <script>
       const API_BASE = "http://localhost:3000"; // 後端網址／port
-      const CITY_STORAGE_KEY = "selectedCity"; // 記錄上次選擇的 key
+      const DEFAULT_CITY = "臺北市";
 
       // 台灣各縣市基準座標（約略中心點）
       const CITY_COORDS = [
@@ -176,9 +176,7 @@
         { name: "屏東縣", lat: 22.6828017, lng: 120.487928 },
       ];
 
-      const DEFAULT_CITY = "臺北市";
-
-      // 頁面載入：初始化選單／localStorage／定位
+      // 頁面載入：初始化選單 + 自動偵測
       window.addEventListener("load", () => {
         const statusEl = document.getElementById("status");
         const locationEl = document.getElementById("location");
@@ -193,52 +191,19 @@
           citySelect.appendChild(opt);
         });
 
-        // 2. 查看 localStorage 是否有儲存的縣市
-        const savedCity = localStorage.getItem(CITY_STORAGE_KEY);
-        const isSavedCityValid = CITY_COORDS.some(
-          (c) => c.name === savedCity
-        );
-
-        if (savedCity && isSavedCityValid) {
-          // 有上次選擇的縣市 → 直接用它
-          citySelect.value = savedCity;
-          statusEl.textContent = `已載入上次選擇的縣市：${savedCity}`;
-          fetchWeatherByCity(savedCity);
-
-          // 額外：有支援定位的話，只顯示座標，不改變城市
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                const { latitude, longitude } = position.coords;
-                locationEl.textContent = `座標：${latitude.toFixed(
-                  4
-                )}, ${longitude.toFixed(4)}`;
-              },
-              (error) => {
-                console.warn("取得定位失敗（僅用於顯示）：", error);
-              }
-            );
-          }
-        } else {
-          // 沒有儲存紀錄 → 用定位 + 最近縣市
-          autoDetectCityWithGeolocation(
-            statusEl,
-            locationEl,
-            citySelect
-          );
-        }
-
-        // 3. 手動選縣市事件：更新畫面 + localStorage
+        // 2. 綁定「手動選縣市」事件：只更新畫面，不記錄
         citySelect.addEventListener("change", (e) => {
           const city = e.target.value;
           if (!city) return;
           statusEl.textContent = `已選擇：${city}`;
-          localStorage.setItem(CITY_STORAGE_KEY, city);
           fetchWeatherByCity(city);
         });
+
+        // 3. 每次進來都用定位 + 最近縣市（不記錄到 localStorage）
+        autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
       });
 
-      // 用定位自動選最近縣市，並記住選擇
+      // 用定位自動選最近縣市
       function autoDetectCityWithGeolocation(
         statusEl,
         locationEl,
@@ -250,7 +215,6 @@
             DEFAULT_CITY +
             "）。";
           citySelect.value = DEFAULT_CITY;
-          localStorage.setItem(CITY_STORAGE_KEY, DEFAULT_CITY);
           fetchWeatherByCity(DEFAULT_CITY);
           return;
         }
@@ -270,14 +234,12 @@
               statusEl.textContent +=
                 "（無法判斷最近縣市，改用 " + DEFAULT_CITY + "）";
               citySelect.value = DEFAULT_CITY;
-              localStorage.setItem(CITY_STORAGE_KEY, DEFAULT_CITY);
               fetchWeatherByCity(DEFAULT_CITY);
               return;
             }
 
             statusEl.textContent += `（最近縣市：${nearest.name}）`;
             citySelect.value = nearest.name;
-            localStorage.setItem(CITY_STORAGE_KEY, nearest.name);
             fetchWeatherByCity(nearest.name);
           },
           (error) => {
@@ -287,7 +249,6 @@
               DEFAULT_CITY +
               "）。";
             citySelect.value = DEFAULT_CITY;
-            localStorage.setItem(CITY_STORAGE_KEY, DEFAULT_CITY);
             fetchWeatherByCity(DEFAULT_CITY);
           }
         );
@@ -353,7 +314,7 @@
         }
       }
 
-      // 把後端回傳的資料顯示出來（已移除風速）
+      // 把後端回傳的資料顯示出來
       function renderWeather(data) {
         const weatherEl = document.getElementById("weather");
 
@@ -391,4 +352,3 @@
     </script>
   </body>
 </html>
-
