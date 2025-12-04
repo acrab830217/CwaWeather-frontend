@@ -554,7 +554,7 @@ h1 {
   html,
   body {
     height: 100vh;
-    overflow: hidden; /* 這裡直接關掉整頁 y 軸 */
+    overflow: hidden; /* 整頁不出現 y 軸 */
   }
 
   body {
@@ -580,7 +580,17 @@ h1 {
   .left-pane,
   .map-panel {
     height: 100%;
-    overflow: hidden; /* 左右欄也完全不出現捲軸 */
+    overflow: hidden;
+  }
+
+  /* ✅ 左邊改成直向 flex，下面那張天氣卡撐滿剩餘高度 */
+  .left-pane {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .left-pane > #weather {
+    flex: 1;  /* 讓 #weather 這張大卡往下長，接近右邊地圖高度 */
   }
 }
 
