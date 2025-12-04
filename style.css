@@ -380,71 +380,42 @@ h1 {
   color: #111827;
 }
 
-/* 地圖主體：參考 CWA 直立島型，但用 CSS 畫 */
+/* 地圖主體區塊 */
 .map-box {
   position: relative;
   border-radius: 18px;
   border: 2px solid #111827;
-  background-image: radial-gradient(
-    circle at 20% 0%,
-    #1d4ed8 0,
-    #0f172a 45%,
-    #020617 100%
-  );
+  background-color: #0b1120;
   overflow: hidden;
   min-height: 260px;
   margin-bottom: 8px;
 }
 
-/* 台灣直立島輪廓：加明顯邊框＋亮色漸層，避免看不到 */
-.map-island {
-  position: absolute;
-  inset: 16px 46px;
-  border-radius: 999px;
-  border: 3px solid #facc15;
-  background-image: linear-gradient(
-    135deg,
-    #fef3c7 0%,
-    #fde68a 35%,
-    #eab308 100%
-  );
-  box-shadow: 0 0 18px rgba(250, 204, 21, 0.65);
-  transform: rotate(-16deg);
-  opacity: 0.95;
-}
-
-/* 點點容器（在島上面） */
-.map-points {
-  position: relative;
+/* D3 畫出的 SVG */
+#taiwanSvg {
+  display: block;
   width: 100%;
   height: 100%;
-  z-index: 2;
 }
 
-/* 每一個縣市點 */
-.map-point {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  border: 2px solid #111827;
-  background-color: rgba(248, 250, 252, 0.9);
+/* 縣市 path 樣式 */
+#taiwanSvg path {
+  fill: #f9fafb;
+  stroke: #111827;
+  stroke-width: 1;
   cursor: pointer;
-  transform: translate(-50%, -50%);
-  transition: transform 0.12s ease, box-shadow 0.12s ease,
-    background-color 0.12s ease, border-color 0.12s ease;
+  transition: fill 0.15s ease, transform 0.15s ease, stroke-width 0.15s;
 }
 
-.map-point:hover {
-  transform: translate(-50%, -50%) scale(1.2);
-  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.3);
+#taiwanSvg path:hover {
+  fill: var(--accent-yellow);
+  stroke-width: 1.5;
 }
 
-.map-point.active {
-  background-color: var(--accent-pink);
-  border-color: #111827;
-  box-shadow: 0 0 0 4px rgba(251, 113, 133, 0.6);
-  transform: translate(-50%, -50%) scale(1.3);
+/* 被選中的縣市 */
+#taiwanSvg path.active {
+  fill: var(--accent-pink);
+  stroke-width: 2;
 }
 
 /* 地圖下方說明 */
@@ -522,7 +493,7 @@ h1 {
   line-height: 1.6;
 }
 
-/* ✅ 可愛建議：和標題一樣明顯 */
+/* 可愛建議（字和標題一樣醒目） */
 .modal-cute-text {
   margin-top: 8px;
   font-size: 16px;

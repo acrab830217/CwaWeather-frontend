@@ -42,22 +42,26 @@
           <div id="weather" class="card" style="margin-top: 16px;"></div>
         </div>
 
-        <!-- 右側：台灣地圖（CSS 模擬直立島 + 點點） -->
+        <!-- 右側：台灣地圖（D3 + GeoJSON） -->
         <div class="map-panel">
           <div class="map-title-row">
             <div class="map-title">台灣地圖</div>
           </div>
+
           <div id="taiwanMap" class="map-box">
-            <!-- CSS 畫出的台灣島輪廓 -->
-            <div class="map-island"></div>
-            <!-- 縣市點點 -->
-            <div id="mapPoints" class="map-points"></div>
+            <!-- D3 會畫在這個 SVG 裡 -->
+            <svg
+              id="taiwanSvg"
+              xmlns="http://www.w3.org/2000/svg"
+              preserveAspectRatio="xMidYMid meet"
+            ></svg>
           </div>
+
           <div id="mapSelectedLabel" class="map-selected-label">
             目前縣市：尚未選擇
           </div>
           <div class="map-note">
-            點擊右側地圖上的色塊圓點，也可以直接切換縣市。
+            點擊右側地圖上的縣市，也可以直接切換天氣。
           </div>
         </div>
       </div>
@@ -79,6 +83,8 @@
       </div>
     </div>
 
+    <!-- D3 v3（沿用 letswrite 教學使用的版本） -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
     <script src="main.js"></script>
   </body>
 </html>
