@@ -8,7 +8,6 @@
       content="自動偵測所在縣市並顯示台灣各地 36 小時天氣預報，支援手動切換縣市的簡易查詢工具。"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- 外部 CSS -->
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -18,13 +17,13 @@
         自動偵測你目前位置，抓出距離最近的縣市，幫你查 36 小時內的天氣預報。
       </div>
 
-      <div id="status">正在檢查伺服器連線...</div>
+      <div id="status">正在取得您的位置...</div>
       <div id="location"></div>
 
       <div class="controls">
         <label for="citySelect">縣市</label>
-        <select id="citySelect" disabled>
-          <option value="">連線檢查中...</option>
+        <select id="citySelect">
+          <option value="">載入中...</option>
         </select>
       </div>
 
@@ -32,11 +31,9 @@
         預設會用你的定位找最近的縣市，你也可以自己改選上方縣市下拉選單。
       </div>
 
-      <!-- 這張卡片只負責顯示天氣 -->
       <div id="weather" class="card" style="margin-top: 16px;"></div>
     </div>
 
-    <!-- 外部 JS -->
     <script src="main.js"></script>
   </body>
 </html>
