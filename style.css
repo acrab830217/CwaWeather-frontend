@@ -1,12 +1,11 @@
-/* ===== Memphis 幾何風：變數設定 ===== */
 :root {
-  --bg-color: #fff7ed; /* 淺奶油底 */
-  --card-bg: #ffffff; /* 卡片白底 */
-  --primary: #111827; /* 主文字深灰近黑 */
-  --primary-accent: #22c7b8; /* 藍綠亮色 */
-  --accent-pink: #fb7185; /* 粉紅 */
-  --accent-yellow: #fde047; /* 黃色 */
-  --accent-purple: #a855f7; /* 紫色 */
+  --bg-color: #fff7ed;
+  --card-bg: #ffffff;
+  --primary: #111827;
+  --primary-accent: #22c7b8;
+  --accent-pink: #fb7185;
+  --accent-yellow: #fde047;
+  --accent-purple: #a855f7;
   --text-main: #111827;
   --text-muted: #6b7280;
 }
@@ -21,10 +20,10 @@ html,
 body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden; /* 防止水平捲動 */
+  overflow-x: hidden;
 }
 
-/* 背景：淡底 + 漸層圓形光暈 */
+/* 背景 */
 body {
   min-height: 100vh;
   display: flex;
@@ -44,16 +43,15 @@ body {
   color: var(--text-main);
 }
 
-/* ===== 主容器 ===== */
+/* 主容器 */
 .app-container {
   width: 100%;
   max-width: 960px;
   padding: 24px 16px 40px;
   position: relative;
-  overflow: hidden; /* 避免裝飾超出造成 X 向捲軸 */
+  overflow: hidden;
 }
 
-/* 左上角三角形裝飾 */
 .app-container::before {
   content: "";
   position: absolute;
@@ -69,7 +67,6 @@ body {
   );
 }
 
-/* 右下角點點方塊裝飾 */
 .app-container::after {
   content: "";
   position: absolute;
@@ -83,7 +80,7 @@ body {
   background-size: 10px 10px;
 }
 
-/* ===== 頁首 ===== */
+/* 標題區 */
 h1 {
   font-size: 22px;
   margin: 0 0 8px;
@@ -105,9 +102,9 @@ h1 {
   word-break: break-word;
 }
 
-/* ===== 控制區（縣市選單） ===== */
+/* 控制區 */
 .controls {
-  margin: 16px 0 18px;
+  margin: 16px 0 10px;
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
@@ -142,15 +139,253 @@ h1 {
   background-color: #ffffff;
 }
 
-/* ===== 天氣卡片 ===== */
+/* 小提示文字 */
+.hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  margin-bottom: 10px;
+}
+
+/* 天氣卡片 */
 .card {
   background-color: var(--card-bg);
   border-radius: 22px;
   padding: 20px 20px 18px;
   border: 3px solid #111827;
-  box-shadow: 0 12px 0 #0f172a; /* 漫畫感投影 */
+  box-shadow: 0 12px 0 #0f172a;
   position: relative;
   overflow: hidden;
+  opacity: 1;
+}
 
+/* 卡片裝飾 */
+.card::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  bottom: 18px;
+  width: 80px;
+  height: 14px;
+  background-color: var(--accent-pink);
+  transform: rotate(-8deg);
+  opacity: 0.9;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background-image: linear-gradient(
+    90deg,
+    var(--accent-yellow) 0 20%,
+    var(--primary-accent) 20% 40%,
+    var(--accent-pink) 40% 60%,
+    #0f172a 60% 80%,
+    var(--accent-purple) 80% 100%
+  );
+}
+
+/* 卡片內容 */
+.city {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  padding-top: 10px;
+}
+
+.meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+ul {
+  padding-left: 18px;
+  margin: 0;
+}
+
+li {
+  list-style: disc;
+  margin-bottom: 6px;
+}
+
+li > div {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+li > div:first-child {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.error {
+  color: #b91c1c;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* 今天概況小卡 */
+.summary-card {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 2px solid #111827;
+  box-shadow: 0 6px 0 #0f172a;
+  background: linear-gradient(
+    135deg,
+    var(--accent-yellow),
+    var(--primary-accent)
+  );
+  color: #111827;
+}
+
+.summary-title {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 4px;
+}
+
+.summary-main {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Modal（今天概況浮動視窗） */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
   opacity: 0;
-  transform: transl
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.modal-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-dialog {
+  background-color: #ffffff;
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 14px 0 #000000;
+  position: relative;
+  border: 3px solid #111827;
+}
+
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  color: #111827;
+  padding: 0;
+  line-height: 1;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-title .emoji {
+  font-size: 22px;
+}
+
+.modal-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.modal-subtext {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 6px;
+}
+
+/* Modal 按鈕 */
+.modal-button {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 2px solid #111827;
+  background-color: var(--primary-accent);
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 4px;
+  box-shadow: 0 6px 0 #0f172a;
+  transition: transform 0.08s ease, box-shadow 0.08s ease,
+    background-color 0.12s;
+}
+
+.modal-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 9px 0 #0f172a;
+  background-color: #1fb3a5;
+}
+
+.modal-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 0 #0f172a;
+}
+
+/* RWD */
+@media (max-width: 480px) {
+  .app-container {
+    padding: 20px 12px 32px;
+  }
+
+  h1 {
+    font-size: 18px;
+  }
+
+  .controls {
+    width: 100%;
+    padding: 8px 10px;
+  }
+
+  .card {
+    padding: 18px 14px 16px;
+    box-shadow: 0 10px 0 #0f172a;
+  }
+
+  ul {
+    padding-left: 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 24px;
+  }
+}

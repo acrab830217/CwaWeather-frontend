@@ -1,0 +1,232 @@
+const API_BASE = "http://localhost:3000"; // 後端網址／port
+const DEFAULT_CITY = "臺北市";
+
+// 台灣各縣市基準座標（約略中心點）
+const CITY_COORDS = [
+  { name: "宜蘭縣", lat: 24.7302791, lng: 121.7631149 },
+  { name: "花蓮縣", lat: 23.9913421, lng: 121.6197276 },
+  { name: "臺東縣", lat: 22.7553667, lng: 121.1506 },
+  { name: "澎湖縣", lat: 23.569694, lng: 119.5664543 },
+  { name: "金門縣", lat: 24.4480637, lng: 118.3856331 },
+  { name: "連江縣", lat: 26.1491915, lng: 119.9389047 },
+  { name: "臺北市", lat: 25.0478, lng: 121.5319 },
+  { name: "新北市", lat: 25.06199, lng: 121.45703 },
+  { name: "桃園市", lat: 24.9937, lng: 121.297 },
+  { name: "臺中市", lat: 24.1469, lng: 120.6839 },
+  { name: "臺南市", lat: 22.99083, lng: 120.21333 },
+  { name: "高雄市", lat: 22.61626, lng: 120.31333 },
+  { name: "基隆市", lat: 25.1283, lng: 121.742 },
+  { name: "新竹縣", lat: 24.8267, lng: 121.0128333 },
+  { name: "新竹市", lat: 24.80361, lng: 120.96861 },
+  { name: "苗栗縣", lat: 24.5647667, lng: 120.8205167 },
+  { name: "彰化縣", lat: 24.0755667, lng: 120.5444667 },
+  { name: "南投縣", lat: 23.90235, lng: 120.6909167 },
+  { name: "雲林縣", lat: 23.6990775, lng: 120.5245511 },
+  { name: "嘉義縣", lat: 23.46333, lng: 120.58166 },
+  { name: "嘉義市", lat: 23.47917, lng: 120.44889 },
+  { name: "屏東縣", lat: 22.6828017, lng: 120.487928 },
+];
+
+// 頁面載入：初始化選單 + 每次都自動偵測
+window.addEventListener("load", () => {
+  const statusEl = document.getElementById("status");
+  const locationEl = document.getElementById("location");
+  const citySelect = document.getElementById("citySelect");
+
+  // 1. 填入所有縣市選項
+  citySelect.innerHTML = "";
+  CITY_COORDS.forEach((c) => {
+    const opt = document.createElement("option");
+    opt.value = c.name;
+    opt.textContent = c.name;
+    citySelect.appendChild(opt);
+  });
+
+  // 2. 手動選縣市事件：只更新畫面
+  citySelect.addEventListener("change", (e) => {
+    const city = e.target.value;
+    if (!city) return;
+    statusEl.textContent = `已選擇：${city}`;
+    fetchWeatherByCity(city);
+  });
+
+  // 3. 每次進來都用定位 + 最近縣市
+  autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
+
+  // 4. Modal 關閉事件
+  const modal = document.getElementById("todayModal");
+  const closeBtn = document.querySelector(".modal-close");
+  const knowBtn = document.getElementById("modalKnowBtn");
+  [closeBtn, knowBtn].forEach((btn) => {
+    btn.addEventListener("click", () => {
+      modal.classList.remove("show");
+    });
+  });
+});
+
+// 用定位自動選最近縣市
+function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
+  if (!navigator.geolocation) {
+    statusEl.textContent =
+      "此瀏覽器不支援定位功能，改用預設城市（" + DEFAULT_CITY + "）。";
+    citySelect.value = DEFAULT_CITY;
+    fetchWeatherByCity(DEFAULT_CITY);
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+
+      statusEl.textContent = "已取得您的位置 ✅";
+      locationEl.textContent = `座標：${latitude.toFixed(
+        4
+      )}, ${longitude.toFixed(4)}`;
+
+      const nearest = getNearestCity(latitude, longitude);
+
+      if (!nearest) {
+        statusEl.textContent +=
+          "（無法判斷最近縣市，改用 " + DEFAULT_CITY + "）";
+        citySelect.value = DEFAULT_CITY;
+        fetchWeatherByCity(DEFAULT_CITY);
+        return;
+      }
+
+      statusEl.textContent += `（最近縣市：${nearest.name}）`;
+      citySelect.value = nearest.name;
+      fetchWeatherByCity(nearest.name);
+    },
+    (error) => {
+      console.error("取得定位失敗：", error);
+      statusEl.textContent =
+        "無法取得您的位置，改用預設城市（" + DEFAULT_CITY + "）。";
+      citySelect.value = DEFAULT_CITY;
+      fetchWeatherByCity(DEFAULT_CITY);
+    }
+  );
+}
+
+// 使用簡單「平面距離」找最近縣市
+function getNearestCity(lat, lng) {
+  let nearest = null;
+  let minDist = Infinity;
+
+  CITY_COORDS.forEach((c) => {
+    const dLat = lat - c.lat;
+    const dLng = lng - c.lng;
+    const dist = dLat * dLat + dLng * dLng;
+
+    if (dist < minDist) {
+      minDist = dist;
+      nearest = c;
+    }
+  });
+
+  return nearest;
+}
+
+// 呼叫後端 /api/weather?city=xxx
+async function fetchWeatherByCity(city) {
+  const weatherEl = document.getElementById("weather");
+  weatherEl.innerHTML = `正在載入 ${city} 的天氣資料...`;
+
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/weather?city=${encodeURIComponent(city)}`
+    );
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("weather API HTTP error:", res.status, text);
+      weatherEl.innerHTML =
+        '<div class="error">取得天氣失敗（HTTP ' +
+        res.status +
+        "）</div>";
+      return;
+    }
+
+    const json = await res.json();
+    console.log("weather API 回傳：", json);
+
+    // 後端可能回傳 { success, data }，也可能直接是資料本體
+    if (json.success === false) {
+      weatherEl.innerHTML =
+        '<div class="error">取得天氣失敗：' +
+        (json.message || "未知錯誤") +
+        "</div>";
+      return;
+    }
+
+    const data = json.data || json; // 兩種格式都支援
+    renderWeather(data);
+    updateTodaySummary(data);
+  } catch (err) {
+    console.error("fetchWeatherByCity 發生錯誤：", err);
+    weatherEl.innerHTML =
+      '<div class="error">無法連線到伺服器，請確認後端是否有啟動。</div>';
+  }
+}
+
+// 把後端回傳的資料顯示出來
+function renderWeather(data) {
+  const weatherEl = document.getElementById("weather");
+
+  if (!data || !Array.isArray(data.forecasts)) {
+    weatherEl.innerHTML =
+      '<div class="error">天氣資料格式錯誤，請稍後再試。</div>';
+    return;
+  }
+
+  const forecasts = data.forecasts.slice(0, 3); // 顯示前 3 筆預報
+
+  let html = `
+    <div class="city">${data.city}</div>
+    <div class="meta">資料描述：${data.updateTime}</div>
+    <ul>
+  `;
+
+  forecasts.forEach((f) => {
+    html += `
+      <li>
+        <div>${f.startTime} ~ ${f.endTime}</div>
+        <div>天氣：${f.weather}</div>
+        <div>氣溫：${f.minTemp} - ${f.maxTemp}</div>
+        <div>降雨機率：${f.rain}</div>
+        <div>舒適度：${f.comfort}</div>
+      </li>
+    `;
+  });
+
+  html += "</ul>";
+
+  weatherEl.innerHTML = html;
+}
+
+// 今天概況小卡 + 浮動視窗
+function updateTodaySummary(data) {
+  if (!data || !Array.isArray(data.forecasts) || !data.forecasts[0]) {
+    return;
+  }
+
+  const first = data.forecasts[0];
+  const summaryCard = document.getElementById("summaryCard");
+  const modal = document.getElementById("todayModal");
+  const modalContent = document.getElementById("modalContent");
+
+  const textLine = `${data.city}：${first.weather}，氣溫 ${first.minTemp} – ${first.maxTemp}，降雨機率 ${first.rain}，舒適度 ${first.comfort}`;
+
+  // 小卡內容
+  summaryCard.innerHTML = `
+    <div class="summary-title">今天概況重點</div>
+    <div class="summary-main">${textLine}</div>
+  `;
+  summaryCard.classList.remove("hidden");
+
+  // 浮動視窗內容
+  modalContent.innerHTML = `
+    <p>目前偵測到你所在位置為 <strong>${data.city}</strong>。</p>
+    <p>這個時段的預報是：<strong>${first.weather}</strong>，氣溫約 <strong>${first.minTemp} – ${first.maxTemp}</strong>，降雨機率 <strong>${first.rain}</strong>，體感 <strong>${first.comfort}</strong>。</p>
+  `;
+  modal.classList.add("show");
+}
