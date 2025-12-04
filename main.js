@@ -217,11 +217,15 @@ function updateTodaySummary(data) {
   const summaryCard = document.getElementById("summaryCard");
   if (!summaryCard) return;
 
-  const textLine = `${data.city}：${first.weather}，氣溫 ${first.minTemp} – ${first.maxTemp}，降雨機率 ${first.rain}，舒適度 ${first.comfort}`;
+  const baseLine = `${data.city}：${first.weather}，氣溫 ${first.minTemp} – ${first.maxTemp}，降雨機率 ${first.rain}，舒適度 ${first.comfort}`;
+  const comfortSentence = `今天是個「${first.comfort}」的天氣，祝你有個美好的一天~~`;
 
   summaryCard.innerHTML = `
     <div class="summary-title">今天概況重點</div>
-    <div class="summary-main">${textLine}</div>
+    <div class="summary-main">
+      <p>${baseLine}</p>
+      <p>${comfortSentence}</p>
+    </div>
   `;
   summaryCard.classList.remove("hidden");
 
@@ -233,6 +237,7 @@ function updateTodaySummary(data) {
       modalContent.innerHTML = `
         <p>目前偵測到你所在位置為 <strong>${data.city}</strong>。</p>
         <p>這個時段的預報是：<strong>${first.weather}</strong>，氣溫約 <strong>${first.minTemp} – ${first.maxTemp}</strong>，降雨機率 <strong>${first.rain}</strong>，體感 <strong>${first.comfort}</strong>。</p>
+        <p>${comfortSentence}</p>
       `;
       modal.classList.add("show");
       hasShownModal = true;

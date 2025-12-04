@@ -301,6 +301,10 @@ li > div:first-child {
   line-height: 1.6;
 }
 
+.summary-main p {
+  margin: 2px 0;
+}
+
 .hidden {
   display: none;
 }
@@ -344,41 +348,19 @@ li > div:first-child {
   color: #111827;
 }
 
-.map-pill {
-  font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 2px solid #111827;
-  background-color: #ffffff;
-  box-shadow: 0 4px 0 #111827;
-}
-
-/* 地圖主體 */
+/* 地圖主體：用你提供的台灣圖 */
 .map-box {
   position: relative;
   border-radius: 18px;
   border: 2px solid #111827;
   background-color: #0f172a;
-  padding: 8px;
+  background-image: url("https://s2.eslite.com/unsafe/fit-in/x900/s.eslite.com/Upload/Product/201907/o/636985171083638750.jpg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   overflow: hidden;
   min-height: 260px;
   margin-bottom: 8px;
-}
-
-/* 台灣島輪廓（簡化：一個旋轉的長條） */
-.map-island {
-  position: absolute;
-  inset: 18px 35px;
-  border-radius: 999px;
-  border: 2px solid #f9fafb;
-  background-image: linear-gradient(
-    135deg,
-    #1f2937 0%,
-    #0f172a 40%,
-    #111827 100%
-  );
-  transform: rotate(-12deg);
-  opacity: 0.9;
 }
 
 /* 點點容器 */
