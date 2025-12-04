@@ -583,16 +583,21 @@ h1 {
     overflow: hidden;
   }
 
-  /* ✅ 左邊改成直向 flex，下面那張天氣卡撐滿剩餘高度 */
+  /* ✅ 左邊整欄變成一張大卡，跟右邊 map-panel 視覺對齊 */
   .left-pane {
     display: flex;
     flex-direction: column;
+    background-color: var(--card-bg);
+    border-radius: 18px;
+    border: 3px solid #111827;
+    box-shadow: 0 8px 0 #0f172a;
+    padding: 12px 14px 10px;
   }
 
+  /* 讓天氣卡往下撐一點，貼近右邊地圖高度 */
   .left-pane > #weather {
-    flex: 1;  /* 讓 #weather 這張大卡往下長，接近右邊地圖高度 */
+    flex: 1;
   }
-}
 
 /* ===== 資料來源說明 ===== */
 .source-note {
