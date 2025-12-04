@@ -128,8 +128,6 @@
           font-size: 1.75rem;
         }
       }
-
-      /* 大螢幕（桌機寬 1440）不用特別寬度，讓內容保持置中即可 */
     </style>
   </head>
   <body>
@@ -355,7 +353,7 @@
         }
       }
 
-      // 把後端回傳的資料顯示出來
+      // 把後端回傳的資料顯示出來（已移除風速）
       function renderWeather(data) {
         const weatherEl = document.getElementById("weather");
 
@@ -381,7 +379,6 @@
               <div>氣溫：${f.minTemp} - ${f.maxTemp}</div>
               <div>降雨機率：${f.rain}</div>
               <div>舒適度：${f.comfort}</div>
-              <div>風速：${f.windSpeed}</div>
             </li>
             <br/>
           `;
@@ -394,3 +391,4 @@
     </script>
   </body>
 </html>
+
