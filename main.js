@@ -3,7 +3,6 @@ const DEFAULT_CITY = "臺北市";
 
 let hasShownModal = false;
 
-// GeoJSON 的 COUNTYNAME 會是「台北市」，CWA / 你這邊是「臺北市」，做一個名字轉換
 function normalizeCountyName(name) {
   if (!name) return "";
   return name
@@ -13,7 +12,6 @@ function normalizeCountyName(name) {
     .replace("台東縣", "臺東縣");
 }
 
-// 台灣各縣市基準座標（約略中心點）
 const CITY_COORDS = [
   { name: "宜蘭縣", lat: 24.7302791, lng: 121.7631149 },
   { name: "花蓮縣", lat: 23.9913421, lng: 121.6197276 },
@@ -39,7 +37,6 @@ const CITY_COORDS = [
   { name: "屏東縣", lat: 22.6828017, lng: 120.487928 },
 ];
 
-// 舒適度 -> 可愛文案 mapping
 function getComfortCuteText(comfort) {
   if (!comfort) return "好好照顧自己，記得多補充水分喔 🧃";
 
@@ -62,7 +59,6 @@ function getComfortCuteText(comfort) {
   return "今天的天氣有自己的個性，照自己的步調，好好過一天吧 🌈";
 }
 
-// D3 地圖：縣市名稱 → path id 的對照表
 const countyNameToIdMap = {};
 
 window.addEventListener("load", () => {
@@ -70,7 +66,6 @@ window.addEventListener("load", () => {
   const locationEl = document.getElementById("location");
   const citySelect = document.getElementById("citySelect");
 
-  // 1. 填入所有縣市選項
   citySelect.innerHTML = "";
   CITY_COORDS.forEach((c) => {
     const opt = document.createElement("option");
@@ -79,13 +74,9 @@ window.addEventListener("load", () => {
     citySelect.appendChild(opt);
   });
 
-  // 2. 初始化 Modal 事件
   initModalEvents();
-
-  // 3. 初始化 D3 台灣地圖
   initTaiwanMap();
 
-  // 4. 手動選縣市
   citySelect.addEventListener("change", (e) => {
     const city = e.target.value;
     if (!city) return;
@@ -94,11 +85,9 @@ window.addEventListener("load", () => {
     fetchWeatherByCity(city);
   });
 
-  // 5. 自動偵測最近縣市
   autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
 });
 
-// 用定位自動選最近縣市
 function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
   if (!navigator.geolocation) {
     statusEl.textContent =
@@ -145,7 +134,6 @@ function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
   );
 }
 
-// 使用平方距離找最近縣市
 function getNearestCity(lat, lng) {
   let nearest = null;
   let minDist = Infinity;
@@ -164,7 +152,6 @@ function getNearestCity(lat, lng) {
   return nearest;
 }
 
-// 呼叫 /api/weather?city=xxx
 async function fetchWeatherByCity(city) {
   const weatherEl = document.getElementById("weather");
   const url = `${API_BASE}/api/weather?city=${encodeURIComponent(city)}`;
@@ -208,7 +195,6 @@ async function fetchWeatherByCity(city) {
   }
 }
 
-// 把天氣資料畫到畫面上（含自動高亮現在時段）
 function renderWeather(data) {
   const weatherEl = document.getElementById("weather");
 
@@ -218,7 +204,7 @@ function renderWeather(data) {
     return;
   }
 
-  const forecasts = data.forecasts.slice(0, 3); // 顯示前 3 筆預報
+  const forecasts = data.forecasts.slice(0, 3);
   const now = new Date();
 
   let html = `
@@ -248,7 +234,6 @@ function renderWeather(data) {
   weatherEl.innerHTML = html;
 }
 
-/* ====== 今天概況：小卡 + 浮動視窗 ====== */
 function updateTodaySummary(data) {
   if (!data || !Array.isArray(data.forecasts) || data.forecasts.length === 0) {
     return;
@@ -261,7 +246,6 @@ function updateTodaySummary(data) {
   const baseLine = `${data.city}：${first.weather}，氣溫 ${first.minTemp} – ${first.maxTemp}，降雨機率 ${first.rain}，舒適度 ${first.comfort}`;
   const cuteText = getComfortCuteText(first.comfort);
 
-  // 小卡只顯示「今日概況」
   summaryCard.innerHTML = `
     <div class="summary-title">今天概況重點</div>
     <div class="summary-main">
@@ -270,7 +254,6 @@ function updateTodaySummary(data) {
   `;
   summaryCard.classList.remove("hidden");
 
-  // 浮動視窗顯示「詳細說明 + 可愛建議」
   if (!hasShownModal) {
     const modal = document.getElementById("todayModal");
     const modalContent = document.getElementById("modalContent");
@@ -286,7 +269,6 @@ function updateTodaySummary(data) {
   }
 }
 
-// Modal 關閉事件
 function initModalEvents() {
   const modal = document.getElementById("todayModal");
   if (!modal) return;
@@ -303,7 +285,7 @@ function initModalEvents() {
   });
 }
 
-/* ====== D3 台灣地圖（使用 bounds 自動 fit） ====== */
+/* ====== D3 台灣地圖（調整高寬＋bounds fit） ====== */
 function initTaiwanMap() {
   const mapBox = document.getElementById("taiwanMap");
   if (!mapBox || typeof d3 === "undefined") {
@@ -312,15 +294,17 @@ function initTaiwanMap() {
   }
 
   const svg = d3.select("#taiwanSvg");
+
   const width = mapBox.clientWidth || 300;
-  const height = mapBox.clientHeight || 320;
+  const height = Math.max(mapBox.clientHeight || 320, width * 1.5); // 直立比例
+
+  mapBox.style.height = height + "px";
 
   svg
     .attr("width", width)
     .attr("height", height)
     .attr("viewBox", "0 0 " + width + " " + height);
 
-  // 先給一個基本的投影（scale=1, translate=[0,0]），等拿到 GeoJSON 再 fit
   const projection = d3.geo
     .mercator()
     .center([121, 24])
@@ -338,10 +322,9 @@ function initTaiwanMap() {
       return;
     }
 
-    // ✅ 用 bounds 自動算 scale + translate，確保整個台灣完整出現在畫面內
     const b = path.bounds(geometry);
     const s =
-      0.95 /
+      0.9 /
       Math.max(
         (b[1][0] - b[0][0]) / width,
         (b[1][1] - b[0][1]) / height
@@ -383,7 +366,6 @@ function initTaiwanMap() {
         fetchWeatherByCity(cityName);
       });
 
-    // GeoJSON 載入後，如果下拉選單已有值，就幫忙更新一下高亮
     const citySelect = document.getElementById("citySelect");
     if (citySelect && citySelect.value) {
       updateMapHighlight(citySelect.value);
@@ -391,7 +373,6 @@ function initTaiwanMap() {
   });
 }
 
-// 根據目前縣市，更新右側地圖的高亮狀態
 function updateMapHighlight(city) {
   const label = document.getElementById("mapSelectedLabel");
   if (label) {
@@ -401,7 +382,6 @@ function updateMapHighlight(city) {
   const svgEl = document.getElementById("taiwanSvg");
   if (!svgEl) return;
 
-  // 先全部清掉 active
   const paths = svgEl.querySelectorAll("path");
   paths.forEach((p) => p.classList.remove("active"));
 

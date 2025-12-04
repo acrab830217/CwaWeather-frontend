@@ -246,7 +246,7 @@ h1 {
   margin-bottom: 10px;
 }
 
-/* 預報列表：自訂樣式，方便高亮 */
+/* 預報列表 */
 .forecast-list {
   list-style: none;
   padding-left: 0;
@@ -272,7 +272,7 @@ h1 {
   margin-bottom: 2px;
 }
 
-/* 目前時間所在區間：加色塊高亮 */
+/* 高亮目前時間區間 */
 .forecast-item.current {
   border-color: #111827;
   background: linear-gradient(
@@ -387,7 +387,7 @@ h1 {
   border: 2px solid #111827;
   background-color: #0b1120;
   overflow: hidden;
-  min-height: 260px;
+  min-height: 320px; /* ⬆️ 拉高一點讓台灣完整顯示 */
   margin-bottom: 8px;
 }
 
@@ -493,7 +493,7 @@ h1 {
   line-height: 1.6;
 }
 
-/* 可愛建議（字和標題一樣醒目） */
+/* 可愛建議 */
 .modal-cute-text {
   margin-top: 8px;
   font-size: 16px;
@@ -561,13 +561,18 @@ h1 {
 
 /* ✅ 桌機版：整頁不滾動，多的內容在左右欄內部捲動 */
 @media (min-width: 1024px) {
+  html,
   body {
-    height: 100vh;
-    overflow-y: hidden;
+    height: 100%;
+    overflow: hidden; /* 整頁不出現 y 軸 */
+  }
+
+  body {
+    align-items: stretch;
   }
 
   .app-container {
-    max-height: 100vh;
+    max-height: 100%;
     padding: 20px 16px 24px;
     display: flex;
     flex-direction: column;
@@ -583,10 +588,10 @@ h1 {
 
   .left-pane,
   .map-panel {
-    overflow-y: auto;
+    overflow-y: auto; /* 各欄自己滾動 */
   }
 
   .map-box {
-    min-height: 240px;
+    min-height: 320px;
   }
 }
