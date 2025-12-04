@@ -111,7 +111,7 @@ body {
   min-width: 0;
 }
 
-/* RWD：手機改一欄，可以捲動 */
+/* RWD：手機 / 平板可以垂直捲動  */
 @media (max-width: 1023px) {
   .layout {
     grid-template-columns: 1fr;
@@ -119,6 +119,11 @@ body {
 
   .app-container {
     padding: 16px 10px 24px;
+  }
+
+  body {
+    min-height: 100vh;
+    overflow-y: auto;
   }
 }
 
@@ -189,7 +194,7 @@ h1 {
   margin-bottom: 6px;
 }
 
-/* 天氣卡片（整體高度縮小一點） */
+/* 天氣卡片 */
 .card {
   background-color: var(--card-bg);
   border-radius: 18px;
@@ -243,7 +248,7 @@ h1 {
   margin-bottom: 6px;
 }
 
-/* 預報列表：只保留 3 筆，樣式更緊湊 */
+/* 預報列表（3 筆、壓成 2 行） */
 .forecast-list {
   list-style: none;
   padding-left: 0;
@@ -259,14 +264,15 @@ h1 {
   position: relative;
 }
 
-.forecast-item > div {
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.forecast-item > div:first-child {
+.forecast-item .line1 {
+  font-size: 11px;
   font-weight: 600;
   margin-bottom: 1px;
+}
+
+.forecast-item .line2 {
+  font-size: 11px;
+  line-height: 1.35;
 }
 
 /* 高亮目前時間區間 */
@@ -378,7 +384,7 @@ h1 {
   color: #111827;
 }
 
-/* 地圖主體區塊：長形長方形，幾乎填滿右邊 */
+/* 地圖主體：長形長方形，填滿右邊 */
 .map-box {
   position: relative;
   border-radius: 16px;
@@ -428,7 +434,7 @@ h1 {
   color: var(--text-muted);
 }
 
-/* Modal（今天概況浮動視窗） */
+/* Modal */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -491,7 +497,6 @@ h1 {
   line-height: 1.5;
 }
 
-/* 可愛建議 */
 .modal-cute-text {
   margin-top: 6px;
   font-size: 16px;
@@ -544,12 +549,12 @@ h1 {
   }
 }
 
-/* ✅ 桌機版：整頁完全不捲動，內容高度卡進一個螢幕 */
+/* ✅ 桌機版：整頁與左右欄都不捲動 */
 @media (min-width: 1024px) {
   html,
   body {
     height: 100vh;
-    overflow: hidden; /* 不出現任何 y 軸 */
+    overflow: hidden; /* 這裡直接關掉整頁 y 軸 */
   }
 
   body {
@@ -557,7 +562,7 @@ h1 {
   }
 
   .app-container {
-    height: 100%;
+    height: 100vh;
     padding: 14px 14px 14px;
     display: flex;
     flex-direction: column;
@@ -569,15 +574,12 @@ h1 {
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
     gap: 18px;
     align-items: stretch;
+    overflow: hidden;
   }
 
   .left-pane,
   .map-panel {
     height: 100%;
-    overflow: hidden; /* 左右欄也不捲動 */
-  }
-
-  .map-box {
-    min-height: 0;
+    overflow: hidden; /* 左右欄也完全不出現捲軸 */
   }
 }

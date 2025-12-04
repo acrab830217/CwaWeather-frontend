@@ -229,13 +229,13 @@ function renderWeather(data) {
     const end = new Date(f.endTime.replace(" ", "T"));
     const isCurrent = now >= start && now < end;
 
+    const line1 = `${f.startTime} ~ ${f.endTime}`;
+    const line2 = `天氣：${f.weather} ｜ 氣溫：${f.minTemp} - ${f.maxTemp} ｜ 降雨：${f.rain} ｜ 體感：${f.comfort}`;
+
     html += `
       <li class="forecast-item ${isCurrent ? "current" : ""}">
-        <div>${f.startTime} ~ ${f.endTime}</div>
-        <div>天氣：${f.weather}</div>
-        <div>氣溫：${f.minTemp} - ${f.maxTemp}</div>
-        <div>降雨機率：${f.rain}</div>
-        <div>舒適度：${f.comfort}</div>
+        <div class="line1">${line1}</div>
+        <div class="line2">${line2}</div>
       </li>
     `;
   });
