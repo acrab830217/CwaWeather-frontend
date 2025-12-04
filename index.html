@@ -28,35 +28,15 @@
         </select>
       </div>
 
-      <!-- 今天概況小卡（關掉浮窗後會常駐） -->
-      <div id="summaryCard" class="summary-card hidden"></div>
-
       <div class="hint">
         預設會用你的定位找最近的縣市，你也可以自己改選上方縣市下拉選單。
       </div>
 
+      <!-- 這張卡片只負責顯示天氣 -->
       <div id="weather" class="card" style="margin-top: 16px;"></div>
     </div>
 
-    <!-- 今天概況浮動視窗 -->
-    <div id="todayModal" class="modal-backdrop">
-      <div class="modal-dialog">
-        <button class="modal-close" type="button" aria-label="關閉">
-          ×
-        </button>
-        <div class="modal-title">
-          <span class="emoji">🌤️</span>
-          <span>今天概況</span>
-        </div>
-        <div id="modalContent" class="modal-text"></div>
-        <button id="modalKnowBtn" class="modal-button">好，我知道了</button>
-        <div class="modal-subtext">
-          之後可以從頁面上的彩色小卡再看到這個摘要。
-        </div>
-      </div>
-    </div>
-
     <!-- 外部 JS -->
-    <script src="main.js"></script>
+    <script src="script.js"></script>
   </body>
 </html>

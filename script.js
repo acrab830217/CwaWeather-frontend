@@ -27,7 +27,7 @@ const CITY_COORDS = [
   { name: "屏東縣", lat: 22.6828017, lng: 120.487928 },
 ];
 
-// 頁面載入：初始化選單 + 每次都自動偵測
+// 頁面載入：初始化選單 + 自動偵測
 window.addEventListener("load", () => {
   const statusEl = document.getElementById("status");
   const locationEl = document.getElementById("location");
@@ -42,7 +42,7 @@ window.addEventListener("load", () => {
     citySelect.appendChild(opt);
   });
 
-  // 2. 手動選縣市事件：只更新畫面
+  // 2. 手動選縣市事件
   citySelect.addEventListener("change", (e) => {
     const city = e.target.value;
     if (!city) return;
@@ -50,18 +50,8 @@ window.addEventListener("load", () => {
     fetchWeatherByCity(city);
   });
 
-  // 3. 每次進來都用定位 + 最近縣市
+  // 3. 自動偵測最近縣市
   autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
-
-  // 4. Modal 關閉事件
-  const modal = document.getElementById("todayModal");
-  const closeBtn = document.querySelector(".modal-close");
-  const knowBtn = document.getElementById("modalKnowBtn");
-  [closeBtn, knowBtn].forEach((btn) => {
-    btn.addEventListener("click", () => {
-      modal.classList.remove("show");
-    });
-  });
 });
 
 // 用定位自動選最近縣市
@@ -107,7 +97,7 @@ function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
   );
 }
 
-// 使用簡單「平面距離」找最近縣市
+// 使用簡單平方距離找最近縣市
 function getNearestCity(lat, lng) {
   let nearest = null;
   let minDist = Infinity;
@@ -149,8 +139,8 @@ async function fetchWeatherByCity(city) {
     const json = await res.json();
     console.log("weather API 回傳：", json);
 
-    // 後端可能回傳 { success, data }，也可能直接是資料本體
-    if (json.success === false) {
+    // ⚠️ 假設後端格式為 { success: true, data: {...} }
+    if (!json.success) {
       weatherEl.innerHTML =
         '<div class="error">取得天氣失敗：' +
         (json.message || "未知錯誤") +
@@ -158,9 +148,8 @@ async function fetchWeatherByCity(city) {
       return;
     }
 
-    const data = json.data || json; // 兩種格式都支援
+    const data = json.data;
     renderWeather(data);
-    updateTodaySummary(data);
   } catch (err) {
     console.error("fetchWeatherByCity 發生錯誤：", err);
     weatherEl.innerHTML =
@@ -168,7 +157,7 @@ async function fetchWeatherByCity(city) {
   }
 }
 
-// 把後端回傳的資料顯示出來
+// 把天氣資料畫到畫面上
 function renderWeather(data) {
   const weatherEl = document.getElementById("weather");
 
@@ -201,32 +190,4 @@ function renderWeather(data) {
   html += "</ul>";
 
   weatherEl.innerHTML = html;
-}
-
-// 今天概況小卡 + 浮動視窗
-function updateTodaySummary(data) {
-  if (!data || !Array.isArray(data.forecasts) || !data.forecasts[0]) {
-    return;
-  }
-
-  const first = data.forecasts[0];
-  const summaryCard = document.getElementById("summaryCard");
-  const modal = document.getElementById("todayModal");
-  const modalContent = document.getElementById("modalContent");
-
-  const textLine = `${data.city}：${first.weather}，氣溫 ${first.minTemp} – ${first.maxTemp}，降雨機率 ${first.rain}，舒適度 ${first.comfort}`;
-
-  // 小卡內容
-  summaryCard.innerHTML = `
-    <div class="summary-title">今天概況重點</div>
-    <div class="summary-main">${textLine}</div>
-  `;
-  summaryCard.classList.remove("hidden");
-
-  // 浮動視窗內容
-  modalContent.innerHTML = `
-    <p>目前偵測到你所在位置為 <strong>${data.city}</strong>。</p>
-    <p>這個時段的預報是：<strong>${first.weather}</strong>，氣溫約 <strong>${first.minTemp} – ${first.maxTemp}</strong>，降雨機率 <strong>${first.rain}</strong>，體感 <strong>${first.comfort}</strong>。</p>
-  `;
-  modal.classList.add("show");
 }
