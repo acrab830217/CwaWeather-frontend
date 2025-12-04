@@ -1,5 +1,7 @@
-const API_BASE = "http://localhost:3000"; // 後端網址／port
+const API_BASE = "http://localhost:3000";
 const DEFAULT_CITY = "臺北市";
+
+let hasShownModal = false;
 
 // 台灣各縣市基準座標（約略中心點）
 const CITY_COORDS = [
@@ -41,15 +43,22 @@ window.addEventListener("load", () => {
     citySelect.appendChild(opt);
   });
 
-  // 2. 手動選縣市
+  // 2. 初始化 Modal 事件
+  initModalEvents();
+
+  // 3. 初始化地圖點點
+  initMapPoints();
+
+  // 4. 手動選縣市
   citySelect.addEventListener("change", (e) => {
     const city = e.target.value;
     if (!city) return;
     statusEl.textContent = `已選擇：${city}`;
+    updateMapHighlight(city);
     fetchWeatherByCity(city);
   });
 
-  // 3. 自動偵測最近縣市
+  // 5. 自動偵測最近縣市
   autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
 });
 
@@ -59,6 +68,7 @@ function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
     statusEl.textContent =
       "此瀏覽器不支援定位功能，改用預設城市（" + DEFAULT_CITY + "）。";
     citySelect.value = DEFAULT_CITY;
+    updateMapHighlight(DEFAULT_CITY);
     fetchWeatherByCity(DEFAULT_CITY);
     return;
   }
@@ -78,12 +88,14 @@ function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
         statusEl.textContent +=
           "（無法判斷最近縣市，改用 " + DEFAULT_CITY + "）";
         citySelect.value = DEFAULT_CITY;
+        updateMapHighlight(DEFAULT_CITY);
         fetchWeatherByCity(DEFAULT_CITY);
         return;
       }
 
       statusEl.textContent += `（最近縣市：${nearest.name}）`;
       citySelect.value = nearest.name;
+      updateMapHighlight(nearest.name);
       fetchWeatherByCity(nearest.name);
     },
     (error) => {
@@ -91,6 +103,7 @@ function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
       statusEl.textContent =
         "無法取得您的位置，改用預設城市（" + DEFAULT_CITY + "）。";
       citySelect.value = DEFAULT_CITY;
+      updateMapHighlight(DEFAULT_CITY);
       fetchWeatherByCity(DEFAULT_CITY);
     }
   );
@@ -139,7 +152,6 @@ async function fetchWeatherByCity(city) {
     const json = await res.json();
     console.log("weather API 回傳：", json);
 
-    // 後端如果是 { success: true, data: {...} }
     if (json.success === false) {
       weatherEl.innerHTML =
         '<div class="error">取得天氣失敗：' +
@@ -148,8 +160,9 @@ async function fetchWeatherByCity(city) {
       return;
     }
 
-    const data = json.data || json; // 兩種格式都吃
+    const data = json.data || json;
     renderWeather(data);
+    updateTodaySummary(data);
   } catch (err) {
     console.error("fetchWeatherByCity 發生錯誤：", err);
     weatherEl.innerHTML =
@@ -192,4 +205,119 @@ function renderWeather(data) {
   html += "</ul>";
 
   weatherEl.innerHTML = html;
+}
+
+/* ====== 今天概況：小卡 + 浮動視窗 ====== */
+function updateTodaySummary(data) {
+  if (!data || !Array.isArray(data.forecasts) || data.forecasts.length === 0) {
+    return;
+  }
+
+  const first = data.forecasts[0];
+  const summaryCard = document.getElementById("summaryCard");
+  if (!summaryCard) return;
+
+  const textLine = `${data.city}：${first.weather}，氣溫 ${first.minTemp} – ${first.maxTemp}，降雨機率 ${first.rain}，舒適度 ${first.comfort}`;
+
+  summaryCard.innerHTML = `
+    <div class="summary-title">今天概況重點</div>
+    <div class="summary-main">${textLine}</div>
+  `;
+  summaryCard.classList.remove("hidden");
+
+  // 第一次載入該頁時，顯示浮動視窗
+  if (!hasShownModal) {
+    const modal = document.getElementById("todayModal");
+    const modalContent = document.getElementById("modalContent");
+    if (modal && modalContent) {
+      modalContent.innerHTML = `
+        <p>目前偵測到你所在位置為 <strong>${data.city}</strong>。</p>
+        <p>這個時段的預報是：<strong>${first.weather}</strong>，氣溫約 <strong>${first.minTemp} – ${first.maxTemp}</strong>，降雨機率 <strong>${first.rain}</strong>，體感 <strong>${first.comfort}</strong>。</p>
+      `;
+      modal.classList.add("show");
+      hasShownModal = true;
+    }
+  }
+}
+
+// Modal 關閉事件
+function initModalEvents() {
+  const modal = document.getElementById("todayModal");
+  if (!modal) return;
+
+  const closeBtn = modal.querySelector(".modal-close");
+  const knowBtn = document.getElementById("modalKnowBtn");
+
+  [closeBtn, knowBtn].forEach((btn) => {
+    if (btn) {
+      btn.addEventListener("click", () => {
+        modal.classList.remove("show");
+      });
+    }
+  });
+}
+
+/* ====== 地圖：建立點點 & 高亮選取縣市 ====== */
+function initMapPoints() {
+  const container = document.getElementById("mapPoints");
+  if (!container) return;
+
+  const lats = CITY_COORDS.map((c) => c.lat);
+  const lngs = CITY_COORDS.map((c) => c.lng);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+
+  CITY_COORDS.forEach((c) => {
+    const point = document.createElement("button");
+    point.type = "button";
+    point.className = "map-point";
+    point.dataset.city = c.name;
+    point.title = c.name;
+
+    // 把經緯度映射到 0–100%（簡單平面投影）
+    const x =
+      ((c.lng - minLng) / (maxLng - minLng || 1)) * 100; /* 防止除以 0 */
+    const y =
+      ((maxLat - c.lat) / (maxLat - minLat || 1)) * 100; /* 緯度越大在越上面 */
+
+    point.style.left = `${x}%`;
+    point.style.top = `${y}%`;
+
+    // 點擊地圖點也可以切換縣市
+    point.addEventListener("click", () => {
+      const citySelect = document.getElementById("citySelect");
+      const statusEl = document.getElementById("status");
+
+      if (citySelect) {
+        citySelect.value = c.name;
+      }
+      if (statusEl) {
+        statusEl.textContent = `已選擇：${c.name}`;
+      }
+
+      updateMapHighlight(c.name);
+      fetchWeatherByCity(c.name);
+    });
+
+    container.appendChild(point);
+  });
+}
+
+// 根據目前縣市，更新右側地圖的高亮狀態
+function updateMapHighlight(city) {
+  const label = document.getElementById("mapSelectedLabel");
+  if (label) {
+    label.textContent = `目前縣市：${city}`;
+  }
+
+  const points = document.querySelectorAll(".map-point");
+  points.forEach((p) => {
+    if (p.dataset.city === city) {
+      p.classList.add("active");
+    } else {
+      p.classList.remove("active");
+    }
+  });
 }

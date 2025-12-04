@@ -12,26 +12,70 @@
   </head>
   <body>
     <div class="app-container">
-      <h1>目前地點天氣</h1>
-      <div class="subtitle">
-        自動偵測你目前位置，抓出距離最近的縣市，幫你查 36 小時內的天氣預報。
+      <div class="layout">
+        <!-- 左側：控制＋天氣資訊 -->
+        <div class="left-pane">
+          <h1>目前地點天氣</h1>
+          <div class="subtitle">
+            自動偵測你目前位置，抓出距離最近的縣市，幫你查 36 小時內的天氣預報。
+          </div>
+
+          <div id="status">正在取得您的位置...</div>
+          <div id="location"></div>
+
+          <div class="controls">
+            <label for="citySelect">縣市</label>
+            <select id="citySelect">
+              <option value="">載入中...</option>
+            </select>
+          </div>
+
+          <div class="hint">
+            預設會用你的定位找最近的縣市，你也可以自己改選上方縣市下拉選單，
+            右邊地圖會同步變色。
+          </div>
+
+          <!-- 今天概況小卡（關掉浮窗後會常駐） -->
+          <div id="summaryCard" class="summary-card hidden"></div>
+
+          <!-- 天氣詳情卡片 -->
+          <div id="weather" class="card" style="margin-top: 16px;"></div>
+        </div>
+
+        <!-- 右側：台灣地圖 -->
+        <div class="map-panel">
+          <div class="map-title-row">
+            <div class="map-title">台灣地圖</div>
+            <div class="map-pill">Memphis View</div>
+          </div>
+          <div id="taiwanMap" class="map-box">
+            <div class="map-island"></div>
+            <div id="mapPoints" class="map-points"></div>
+          </div>
+          <div id="mapSelectedLabel" class="map-selected-label">
+            目前縣市：尚未選擇
+          </div>
+          <div class="map-note">
+            點擊右側地圖上的色塊圓點，也可以直接切換縣市。
+          </div>
+        </div>
       </div>
+    </div>
 
-      <div id="status">正在取得您的位置...</div>
-      <div id="location"></div>
-
-      <div class="controls">
-        <label for="citySelect">縣市</label>
-        <select id="citySelect">
-          <option value="">載入中...</option>
-        </select>
+    <!-- 今天概況浮動視窗（Modal） -->
+    <div id="todayModal" class="modal-backdrop">
+      <div class="modal-dialog">
+        <button class="modal-close" type="button" aria-label="關閉">×</button>
+        <div class="modal-title">
+          <span class="emoji">🌤️</span>
+          <span>今天概況</span>
+        </div>
+        <div id="modalContent" class="modal-text"></div>
+        <button id="modalKnowBtn" class="modal-button">好，我知道了</button>
+        <div class="modal-subtext">
+          關閉後，下方彩色小卡會一直保留今天概況摘要。
+        </div>
       </div>
-
-      <div class="hint">
-        預設會用你的定位找最近的縣市，你也可以自己改選上方縣市下拉選單。
-      </div>
-
-      <div id="weather" class="card" style="margin-top: 16px;"></div>
     </div>
 
     <script src="main.js"></script>
