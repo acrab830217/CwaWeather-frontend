@@ -583,3 +583,25 @@ h1 {
     overflow: hidden; /* 左右欄也完全不出現捲軸 */
   }
 }
+
+/* ===== 資料來源說明 ===== */
+.summary-card {
+  margin-bottom: 4px; /* 原本是 8px，稍微縮小一點給來源文字空間 */
+}
+
+.source-note {
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.source-note a {
+  color: #111827;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+.source-note a:hover {
+  text-decoration-style: dotted;
+}
