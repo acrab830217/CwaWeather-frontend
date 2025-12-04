@@ -47,7 +47,7 @@ body {
 .app-container {
   width: 100%;
   max-width: 1100px;
-  padding: 24px 16px 40px;
+  padding: 16px 14px 18px;
   position: relative;
   overflow: hidden;
   opacity: 0;
@@ -58,9 +58,9 @@ body {
 .app-container::before {
   content: "";
   position: absolute;
-  width: 80px;
-  height: 80px;
-  top: -20px;
+  width: 60px;
+  height: 60px;
+  top: -14px;
   left: 8px;
   z-index: -1;
   background: linear-gradient(
@@ -73,8 +73,8 @@ body {
 .app-container::after {
   content: "";
   position: absolute;
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   right: 8px;
   bottom: -10px;
   z-index: -1;
@@ -101,78 +101,76 @@ body {
 /* 兩欄版型 */
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
 }
 
-.left-pane {
-  min-width: 0;
-}
-
+.left-pane,
 .map-panel {
   min-width: 0;
 }
 
-/* RWD：手機改一欄 */
-@media (max-width: 768px) {
+/* RWD：手機改一欄，可以捲動 */
+@media (max-width: 1023px) {
   .layout {
     grid-template-columns: 1fr;
   }
 
   .app-container {
-    padding: 20px 12px 32px;
+    padding: 16px 10px 24px;
   }
 }
 
 /* 標題區 */
 h1 {
-  font-size: 22px;
-  margin: 0 0 8px;
+  font-size: 20px;
+  margin: 0 0 6px;
   letter-spacing: 0.04em;
 }
 
 .subtitle {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
-  margin-bottom: 12px;
-  line-height: 1.6;
+  margin-bottom: 8px;
+  line-height: 1.5;
 }
 
 #status,
 #location {
-  font-size: 13px;
-  margin-bottom: 4px;
+  font-size: 11px;
+  margin-bottom: 2px;
   color: var(--text-muted);
   word-break: break-word;
 }
 
 /* 控制區 */
 .controls {
-  margin: 16px 0 10px;
+  margin: 10px 0 6px;
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: 6px;
+  padding: 6px 10px;
   border-radius: 999px;
   background-color: rgba(255, 255, 255, 0.9);
   border: 2px solid #111827;
-  box-shadow: 0 6px 0 #0f172a;
+  box-shadow: 0 5px 0 #0f172a;
 }
 
 .controls label {
-  font-size: 12px;
+  font-size: 11px;
   color: #4b5563;
   text-transform: uppercase;
   letter-spacing: 0.16em;
 }
 
 #citySelect {
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 999px;
   border: 2px solid #111827;
   background-color: #f9fafb;
-  font-size: 13px;
+  font-size: 12px;
   cursor: pointer;
   max-width: 100%;
 }
@@ -183,33 +181,32 @@ h1 {
   background-color: #ffffff;
 }
 
-/* 小提示文字 */
+/* 小提示 */
 .hint {
   font-size: 11px;
   color: var(--text-muted);
-  margin-top: 4px;
-  margin-bottom: 10px;
+  margin-top: 2px;
+  margin-bottom: 6px;
 }
 
-/* 天氣卡片 */
+/* 天氣卡片（整體高度縮小一點） */
 .card {
   background-color: var(--card-bg);
-  border-radius: 22px;
-  padding: 20px 20px 18px;
+  border-radius: 18px;
+  padding: 14px 14px 10px;
   border: 3px solid #111827;
-  box-shadow: 0 12px 0 #0f172a;
+  box-shadow: 0 8px 0 #0f172a;
   position: relative;
   overflow: hidden;
-  opacity: 1;
 }
 
 .card::after {
   content: "";
   position: absolute;
   left: 10px;
-  bottom: 18px;
-  width: 80px;
-  height: 14px;
+  bottom: 12px;
+  width: 60px;
+  height: 10px;
   background-color: var(--accent-pink);
   transform: rotate(-8deg);
   opacity: 0.9;
@@ -221,7 +218,7 @@ h1 {
   top: 0;
   left: 0;
   right: 0;
-  height: 14px;
+  height: 10px;
   background-image: linear-gradient(
     90deg,
     var(--accent-yellow) 0 20%,
@@ -234,19 +231,19 @@ h1 {
 
 /* 卡片內容 */
 .city {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
-  margin-bottom: 4px;
-  padding-top: 10px;
+  margin-bottom: 2px;
+  padding-top: 8px;
 }
 
 .meta {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
-/* 預報列表 */
+/* 預報列表：只保留 3 筆，樣式更緊湊 */
 .forecast-list {
   list-style: none;
   padding-left: 0;
@@ -254,22 +251,22 @@ h1 {
 }
 
 .forecast-item {
-  border-radius: 12px;
-  padding: 8px 10px;
-  margin-bottom: 8px;
+  border-radius: 10px;
+  padding: 6px 8px;
+  margin-bottom: 4px;
   background-color: #f9fafb;
   border: 1px solid #e5e7eb;
   position: relative;
 }
 
 .forecast-item > div {
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .forecast-item > div:first-child {
   font-weight: 600;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 /* 高亮目前時間區間 */
@@ -280,19 +277,19 @@ h1 {
     rgba(253, 224, 71, 0.32),
     rgba(34, 199, 184, 0.38)
   );
-  box-shadow: 0 3px 0 rgba(15, 23, 42, 0.5);
+  box-shadow: 0 2px 0 rgba(15, 23, 42, 0.5);
 }
 
 .forecast-item.current::before {
   content: "NOW";
   position: absolute;
-  top: -9px;
-  right: 12px;
-  font-size: 9px;
+  top: -7px;
+  right: 10px;
+  font-size: 8px;
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  padding: 2px 6px;
+  padding: 1px 5px;
   border-radius: 999px;
   background-color: #111827;
   color: #f9fafb;
@@ -301,17 +298,17 @@ h1 {
 .error {
   color: #b91c1c;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 /* 今天概況小卡 */
 .summary-card {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  padding: 10px 14px;
-  border-radius: 16px;
+  margin-top: 6px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: 14px;
   border: 2px solid #111827;
-  box-shadow: 0 6px 0 #0f172a;
+  box-shadow: 0 5px 0 #0f172a;
   background: linear-gradient(
     135deg,
     var(--accent-yellow),
@@ -321,20 +318,20 @@ h1 {
 }
 
 .summary-title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .summary-main {
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .summary-main p {
-  margin: 2px 0;
+  margin: 1px 0;
 }
 
 .hidden {
@@ -344,21 +341,22 @@ h1 {
 /* 右側地圖區 */
 .map-panel {
   background-color: rgba(249, 250, 251, 0.9);
-  border-radius: 20px;
-  padding: 14px 14px 16px;
+  border-radius: 18px;
+  padding: 12px 12px 10px;
   border: 3px solid #111827;
-  box-shadow: 0 10px 0 #0f172a;
+  box-shadow: 0 8px 0 #0f172a;
   position: relative;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .map-panel::after {
   content: "";
   position: absolute;
   left: 12px;
-  bottom: 10px;
-  width: 50px;
-  height: 10px;
+  bottom: 8px;
+  width: 46px;
+  height: 8px;
   background-color: var(--accent-purple);
   transform: rotate(-10deg);
   opacity: 0.9;
@@ -368,27 +366,28 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 
 .map-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #111827;
 }
 
-/* 地圖主體區塊 */
+/* 地圖主體區塊：長形長方形，幾乎填滿右邊 */
 .map-box {
   position: relative;
-  border-radius: 18px;
+  border-radius: 16px;
   border: 2px solid #111827;
   background-color: #0b1120;
   overflow: hidden;
-  min-height: 320px; /* ⬆️ 拉高一點讓台灣完整顯示 */
-  margin-bottom: 8px;
+  flex: 1;
+  min-height: 260px;
+  margin-bottom: 6px;
 }
 
 /* D3 畫出的 SVG */
@@ -418,11 +417,10 @@ h1 {
   stroke-width: 2;
 }
 
-/* 地圖下方說明 */
 .map-selected-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .map-note {
@@ -452,10 +450,10 @@ h1 {
 .modal-dialog {
   background-color: #ffffff;
   border-radius: 18px;
-  padding: 18px 18px 16px;
-  max-width: 360px;
+  padding: 16px 16px 12px;
+  max-width: 340px;
   width: 90%;
-  box-shadow: 0 14px 0 #000000;
+  box-shadow: 0 12px 0 #000000;
   position: relative;
   border: 3px solid #111827;
 }
@@ -476,7 +474,7 @@ h1 {
 .modal-title {
   font-size: 18px;
   font-weight: 800;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -489,13 +487,13 @@ h1 {
 .modal-text {
   font-size: 13px;
   color: var(--text-muted);
-  margin-bottom: 10px;
-  line-height: 1.6;
+  margin-bottom: 6px;
+  line-height: 1.5;
 }
 
 /* 可愛建議 */
 .modal-cute-text {
-  margin-top: 8px;
+  margin-top: 6px;
   font-size: 16px;
   font-weight: 800;
   color: #111827;
@@ -505,13 +503,12 @@ h1 {
 .modal-subtext {
   font-size: 11px;
   color: #9ca3af;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
-/* Modal 按鈕 */
 .modal-button {
   width: 100%;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: 999px;
   border: 2px solid #111827;
   background-color: var(--primary-accent);
@@ -519,7 +516,7 @@ h1 {
   font-weight: 700;
   font-size: 14px;
   cursor: pointer;
-  margin-top: 4px;
+  margin-top: 2px;
   box-shadow: 0 6px 0 #0f172a;
   transition: transform 0.08s ease, box-shadow 0.08s ease,
     background-color 0.12s;
@@ -536,35 +533,23 @@ h1 {
   box-shadow: 0 4px 0 #0f172a;
 }
 
-/* RWD 微調 */
+/* 手機字體微調 */
 @media (max-width: 480px) {
   h1 {
     font-size: 18px;
   }
 
-  .controls {
-    width: 100%;
-    padding: 8px 10px;
-  }
-
   .card {
-    padding: 18px 14px 16px;
-    box-shadow: 0 10px 0 #0f172a;
+    padding: 14px 12px 10px;
   }
 }
 
-@media (min-width: 768px) {
-  h1 {
-    font-size: 24px;
-  }
-}
-
-/* ✅ 桌機版：整頁不滾動，多的內容在左右欄內部捲動 */
+/* ✅ 桌機版：整頁完全不捲動，內容高度卡進一個螢幕 */
 @media (min-width: 1024px) {
   html,
   body {
-    height: 100%;
-    overflow: hidden; /* 整頁不出現 y 軸 */
+    height: 100vh;
+    overflow: hidden; /* 不出現任何 y 軸 */
   }
 
   body {
@@ -572,8 +557,8 @@ h1 {
   }
 
   .app-container {
-    max-height: 100%;
-    padding: 20px 16px 24px;
+    height: 100%;
+    padding: 14px 14px 14px;
     display: flex;
     flex-direction: column;
   }
@@ -581,17 +566,18 @@ h1 {
   .layout {
     flex: 1;
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    gap: 24px;
-    overflow: hidden;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 18px;
+    align-items: stretch;
   }
 
   .left-pane,
   .map-panel {
-    overflow-y: auto; /* 各欄自己滾動 */
+    height: 100%;
+    overflow: hidden; /* 左右欄也不捲動 */
   }
 
   .map-box {
-    min-height: 320px;
+    min-height: 0;
   }
 }

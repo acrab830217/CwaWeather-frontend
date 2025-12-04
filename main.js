@@ -3,6 +3,7 @@ const DEFAULT_CITY = "臺北市";
 
 let hasShownModal = false;
 
+// GeoJSON 縣市名稱 -> CWA 名稱
 function normalizeCountyName(name) {
   if (!name) return "";
   return name
@@ -12,6 +13,7 @@ function normalizeCountyName(name) {
     .replace("台東縣", "臺東縣");
 }
 
+// 台灣各縣市基準坐標
 const CITY_COORDS = [
   { name: "宜蘭縣", lat: 24.7302791, lng: 121.7631149 },
   { name: "花蓮縣", lat: 23.9913421, lng: 121.6197276 },
@@ -37,6 +39,7 @@ const CITY_COORDS = [
   { name: "屏東縣", lat: 22.6828017, lng: 120.487928 },
 ];
 
+// 舒適度 -> 可愛文案
 function getComfortCuteText(comfort) {
   if (!comfort) return "好好照顧自己，記得多補充水分喔 🧃";
 
@@ -59,6 +62,7 @@ function getComfortCuteText(comfort) {
   return "今天的天氣有自己的個性，照自己的步調，好好過一天吧 🌈";
 }
 
+// D3 地圖：縣市名稱 -> path id
 const countyNameToIdMap = {};
 
 window.addEventListener("load", () => {
@@ -66,6 +70,7 @@ window.addEventListener("load", () => {
   const locationEl = document.getElementById("location");
   const citySelect = document.getElementById("citySelect");
 
+  // 填入縣市選項
   citySelect.innerHTML = "";
   CITY_COORDS.forEach((c) => {
     const opt = document.createElement("option");
@@ -77,6 +82,7 @@ window.addEventListener("load", () => {
   initModalEvents();
   initTaiwanMap();
 
+  // 手動選縣市
   citySelect.addEventListener("change", (e) => {
     const city = e.target.value;
     if (!city) return;
@@ -85,9 +91,11 @@ window.addEventListener("load", () => {
     fetchWeatherByCity(city);
   });
 
+  // 自動偵測最近縣市
   autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
 });
 
+// 自動偵測＋最近縣市
 function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
   if (!navigator.geolocation) {
     statusEl.textContent =
@@ -134,6 +142,7 @@ function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
   );
 }
 
+// 用平方距離找最近縣市
 function getNearestCity(lat, lng) {
   let nearest = null;
   let minDist = Infinity;
@@ -152,6 +161,7 @@ function getNearestCity(lat, lng) {
   return nearest;
 }
 
+// 呼叫 /api/weather?city=xxx
 async function fetchWeatherByCity(city) {
   const weatherEl = document.getElementById("weather");
   const url = `${API_BASE}/api/weather?city=${encodeURIComponent(city)}`;
@@ -195,6 +205,7 @@ async function fetchWeatherByCity(city) {
   }
 }
 
+// 畫出 3 筆預報（含 NOW 高亮）
 function renderWeather(data) {
   const weatherEl = document.getElementById("weather");
 
@@ -204,7 +215,7 @@ function renderWeather(data) {
     return;
   }
 
-  const forecasts = data.forecasts.slice(0, 3);
+  const forecasts = data.forecasts.slice(0, 3); // ✅ 保留 3 筆
   const now = new Date();
 
   let html = `
@@ -234,6 +245,7 @@ function renderWeather(data) {
   weatherEl.innerHTML = html;
 }
 
+/* ====== 今天概況：小卡 + 浮動視窗 ====== */
 function updateTodaySummary(data) {
   if (!data || !Array.isArray(data.forecasts) || data.forecasts.length === 0) {
     return;
@@ -269,6 +281,7 @@ function updateTodaySummary(data) {
   }
 }
 
+// Modal 關閉
 function initModalEvents() {
   const modal = document.getElementById("todayModal");
   if (!modal) return;
@@ -285,7 +298,7 @@ function initModalEvents() {
   });
 }
 
-/* ====== D3 台灣地圖（調整高寬＋bounds fit） ====== */
+/* ====== D3 台灣地圖：使用 map-box 的實際高度，填滿右邊方框 ====== */
 function initTaiwanMap() {
   const mapBox = document.getElementById("taiwanMap");
   if (!mapBox || typeof d3 === "undefined") {
@@ -295,10 +308,10 @@ function initTaiwanMap() {
 
   const svg = d3.select("#taiwanSvg");
 
-  const width = mapBox.clientWidth || 300;
-  const height = Math.max(mapBox.clientHeight || 320, width * 1.5); // 直立比例
-
-  mapBox.style.height = height + "px";
+  // 讀取容器實際尺寸（右側長形卡片）
+  const rect = mapBox.getBoundingClientRect();
+  const width = rect.width || 320;
+  const height = rect.height || 260;
 
   svg
     .attr("width", width)
@@ -373,6 +386,7 @@ function initTaiwanMap() {
   });
 }
 
+// 根據縣市名稱更新地圖高亮
 function updateMapHighlight(city) {
   const label = document.getElementById("mapSelectedLabel");
   if (label) {
