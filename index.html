@@ -3,68 +3,156 @@
   <head>
     <meta charset="UTF-8" />
     <title>天氣小工具</title>
+    <!-- SEO 描述：50–160 字元之間 -->
+    <meta
+      name="description"
+      content="自動偵測所在縣市並顯示台灣各地 36 小時天氣預報，支援記住上次選擇與手動切換縣市的簡易查詢工具。"
+    />
+    <!-- 響應式視窗設定 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
+      /* 確保在 320 / 768 / 1440 都不會水平捲動 */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        overflow-x: hidden;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: inherit;
+      }
+
       body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           sans-serif;
-        padding: 20px;
+        padding: 16px;
         background: #f5f5f5;
       }
+
+      .page-wrapper {
+        max-width: 960px;
+        margin: 0 auto;
+      }
+
       .card {
         background: white;
         border-radius: 8px;
         padding: 16px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
         max-width: 700px;
       }
+
+      h1 {
+        font-size: 1.5rem;
+        margin: 0 0 12px;
+        word-break: break-word;
+      }
+
+      #status,
+      #location {
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+        word-break: break-word;
+      }
+
       .city {
-        font-size: 20px;
+        font-size: 1.25rem;
         font-weight: bold;
         margin-bottom: 8px;
+        word-break: break-word;
       }
+
       .meta {
-        font-size: 12px;
+        font-size: 0.8rem;
         color: #666;
         margin-bottom: 12px;
+        word-break: break-word;
       }
+
       .error {
         color: #c00;
         font-weight: bold;
       }
+
       ul {
         padding-left: 20px;
+        margin: 0;
       }
+
+      li {
+        list-style: disc;
+      }
+
       .controls {
-        margin-bottom: 12px;
+        margin: 12px 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
       }
+
       label {
-        font-size: 14px;
-        margin-right: 8px;
+        font-size: 0.9rem;
+        margin-right: 4px;
+        white-space: nowrap;
       }
+
       select {
         padding: 4px 8px;
+        max-width: 100%;
       }
+
+      /* 小螢幕優化（320px ~ 480px） */
+      @media (max-width: 480px) {
+        body {
+          padding: 12px;
+        }
+
+        .card {
+          padding: 12px;
+        }
+
+        h1 {
+          font-size: 1.25rem;
+        }
+      }
+
+      /* 中型螢幕（平板） */
+      @media (min-width: 768px) {
+        h1 {
+          font-size: 1.75rem;
+        }
+      }
+
+      /* 大螢幕（桌機寬 1440）不用特別寬度，讓內容保持置中即可 */
     </style>
   </head>
   <body>
-    <h1>目前地點天氣</h1>
-    <div id="status">正在取得您的位置...</div>
-    <div id="location"></div>
+    <div class="page-wrapper">
+      <h1>目前地點天氣</h1>
+      <div id="status">正在取得您的位置...</div>
+      <div id="location"></div>
 
-    <div class="controls">
-      <label for="citySelect">縣市：</label>
-      <select id="citySelect">
-        <option value="">自動偵測中...</option>
-      </select>
+      <div class="controls">
+        <label for="citySelect">縣市：</label>
+        <select id="citySelect">
+          <option value="">自動偵測中...</option>
+        </select>
+      </div>
+
+      <div id="weather" class="card"></div>
     </div>
-
-    <div id="weather" class="card"></div>
 
     <script>
       const API_BASE = "http://localhost:3000"; // 後端網址／port
-      const CITY_STORAGE_KEY = "selectedCity"; // 🔑 記錄上次選擇的 key
+      const CITY_STORAGE_KEY = "selectedCity"; // 記錄上次選擇的 key
 
-      // ✅ 台灣各縣市基準座標（約略中心點即可）
+      // 台灣各縣市基準座標（約略中心點）
       const CITY_COORDS = [
         { name: "宜蘭縣", lat: 24.7302791, lng: 121.7631149 },
         { name: "花蓮縣", lat: 23.9913421, lng: 121.6197276 },
@@ -92,7 +180,7 @@
 
       const DEFAULT_CITY = "臺北市";
 
-      // ✅ 頁面載入：先把下拉選單塞選項，再處理「上次選擇」與定位
+      // 頁面載入：初始化選單／localStorage／定位
       window.addEventListener("load", () => {
         const statusEl = document.getElementById("status");
         const locationEl = document.getElementById("location");
@@ -114,12 +202,12 @@
         );
 
         if (savedCity && isSavedCityValid) {
-          // 🎯 有上次選擇的縣市 → 直接用它，不用再自動偵測
+          // 有上次選擇的縣市 → 直接用它
           citySelect.value = savedCity;
           statusEl.textContent = `已載入上次選擇的縣市：${savedCity}`;
           fetchWeatherByCity(savedCity);
 
-          // 額外：有支援定位的話，只是顯示座標，不改變城市
+          // 額外：有支援定位的話，只顯示座標，不改變城市
           if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
               (position) => {
@@ -134,7 +222,7 @@
             );
           }
         } else {
-          // 🧭 沒有儲存紀錄 → 用定位 + 最近縣市
+          // 沒有儲存紀錄 → 用定位 + 最近縣市
           autoDetectCityWithGeolocation(
             statusEl,
             locationEl,
@@ -142,17 +230,17 @@
           );
         }
 
-        // 3. 綁定「手動選縣市」事件：更新畫面 + localStorage
+        // 3. 手動選縣市事件：更新畫面 + localStorage
         citySelect.addEventListener("change", (e) => {
           const city = e.target.value;
           if (!city) return;
           statusEl.textContent = `已選擇：${city}`;
-          localStorage.setItem(CITY_STORAGE_KEY, city); // 🔐 存起來
+          localStorage.setItem(CITY_STORAGE_KEY, city);
           fetchWeatherByCity(city);
         });
       });
 
-      // ✅ 用定位自動選最近縣市，並記住選擇
+      // 用定位自動選最近縣市，並記住選擇
       function autoDetectCityWithGeolocation(
         statusEl,
         locationEl,
@@ -191,7 +279,7 @@
 
             statusEl.textContent += `（最近縣市：${nearest.name}）`;
             citySelect.value = nearest.name;
-            localStorage.setItem(CITY_STORAGE_KEY, nearest.name); // 🔐 存起來
+            localStorage.setItem(CITY_STORAGE_KEY, nearest.name);
             fetchWeatherByCity(nearest.name);
           },
           (error) => {
@@ -201,13 +289,13 @@
               DEFAULT_CITY +
               "）。";
             citySelect.value = DEFAULT_CITY;
-            localStorage.setItem(CITY_STORAGE_KEY, DEFAULT_CITY); // 🔐 存起來
+            localStorage.setItem(CITY_STORAGE_KEY, DEFAULT_CITY);
             fetchWeatherByCity(DEFAULT_CITY);
           }
         );
       }
 
-      // ✅ 使用簡單「平面距離」找最近縣市
+      // 使用簡單「平面距離」找最近縣市
       function getNearestCity(lat, lng) {
         let nearest = null;
         let minDist = Infinity;
@@ -226,7 +314,7 @@
         return nearest;
       }
 
-      // ✅ 呼叫後端 /api/weather?city=xxx
+      // 呼叫後端 /api/weather?city=xxx
       async function fetchWeatherByCity(city) {
         const weatherEl = document.getElementById("weather");
         weatherEl.innerHTML = `正在載入 ${city} 的天氣資料...`;
@@ -267,7 +355,7 @@
         }
       }
 
-      // ✅ 把後端回傳的資料顯示出來
+      // 把後端回傳的資料顯示出來
       function renderWeather(data) {
         const weatherEl = document.getElementById("weather");
 
