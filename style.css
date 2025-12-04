@@ -528,7 +528,7 @@ h1 {
 .modal-dialog {
   background-color: #ffffff;
   border-radius: 18px;
-  padding: 16px 16px 12px;
+  padding: 18px 16px 18px;   /* ✅ 底部 padding 從 12 調成 18 */
   max-width: 340px;
   width: 90%;
   box-shadow: 0 12px 0 #000000;
@@ -580,7 +580,8 @@ h1 {
 .modal-subtext {
   font-size: 11px;
   color: #9ca3af;
-  margin-top: 4px;
+  margin-top: 6px;
+  margin-bottom: 2px;       /* ✅ 跟底部邊界保持距離 */
 }
 
 .modal-button {
@@ -593,7 +594,7 @@ h1 {
   font-weight: 700;
   font-size: 14px;
   cursor: pointer;
-  margin-top: 2px;
+  margin-top: 8px;          /* ✅ 往上留多一點空間 */
   box-shadow: 0 6px 0 #0f172a;
   transition: transform 0.08s ease, box-shadow 0.08s ease,
     background-color 0.12s;
@@ -655,7 +656,7 @@ h1 {
     overflow: hidden;
   }
 
-  /* ✅ 左邊整欄變成一張大卡，跟右邊 map-panel 視覺對齊 */
+  /* ✅ 左邊整欄包進一張大卡，視覺上跟右邊 map-panel 對齊 */
   .left-pane {
     display: flex;
     flex-direction: column;
@@ -666,7 +667,6 @@ h1 {
     padding: 12px 14px 10px;
   }
 
-  /* 讓天氣卡往下撐一點，貼近右邊地圖高度 */
   .left-pane > #weather {
     flex: 1;
   }
