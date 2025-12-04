@@ -67,11 +67,20 @@ function applyBackgroundTheme() {
   const hour = new Date().getHours();
   const body = document.body;
 
-  body.classList.remove("theme-day", "theme-night");
+  body.classList.remove(
+    "theme-day",
+    "theme-night",
+    "theme-sunrise",
+    "theme-sunset"
+  );
 
-  // 06:00 ~ 18:00 視為白天，其餘視為夜間
-  if (hour >= 6 && hour < 18) {
+  // 04:00–07:59 清晨、08:00–16:59 白天、17:00–19:59 黃昏，其餘深夜
+  if (hour >= 4 && hour < 8) {
+    body.classList.add("theme-sunrise");
+  } else if (hour >= 8 && hour < 17) {
     body.classList.add("theme-day");
+  } else if (hour >= 17 && hour < 20) {
+    body.classList.add("theme-sunset");
   } else {
     body.classList.add("theme-night");
   }
@@ -81,7 +90,9 @@ function applyBackgroundTheme() {
 const countyNameToIdMap = {};
 
 window.addEventListener("load", () => {
-  applyBackgroundTheme();  // ✅ 依時間套用背景主題
+  applyBackgroundTheme();  // 依時間套主題
+  setInterval(applyBackgroundTheme, 30 * 60 * 1000); // 30 分鐘檢查一次
+  updateTodayBadge();      // ✅ 設定今天日期顯示
 
   const statusEl = document.getElementById("status");
   const locationEl = document.getElementById("location");
@@ -222,6 +233,27 @@ async function fetchWeatherByCity(city) {
   }
 }
 
+// 日期小標籤
+function updateTodayBadge() {
+  const badge = document.getElementById("dateBadge");
+  if (!badge) return;
+
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const weekdayNames = ["日", "一", "二", "三", "四", "五", "六"];
+  const weekday = weekdayNames[now.getDay()];
+
+  badge.textContent = `今天 ${mm}/${dd}（${weekday}）`;
+}
+
+function formatTimeRange(startStr, endStr) {
+  // CWA 時間格式為 "YYYY-MM-DD HH:mm:ss"
+  const startTime = startStr.slice(11, 16);
+  const endTime = endStr.slice(11, 16);
+  return `${startTime} ~ ${endTime}`;
+}
+
 // 畫出 3 筆預報（含 NOW 高亮）
 function renderWeather(data) {
   const weatherEl = document.getElementById("weather");
@@ -246,7 +278,7 @@ function renderWeather(data) {
     const end = new Date(f.endTime.replace(" ", "T"));
     const isCurrent = now >= start && now < end;
 
-    const line1 = `${f.startTime} ~ ${f.endTime}`;
+    const line1 = `時段：${formatTimeRange(f.startTime, f.endTime)}`;
     const line2 = `天氣：${f.weather} ｜ 氣溫：${f.minTemp} - ${f.maxTemp} ｜ 降雨：${f.rain} ｜ 體感：${f.comfort}`;
 
     html += `
