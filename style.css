@@ -601,10 +601,10 @@ h1 {
 
 /* ===== 資料來源說明 ===== */
 .source-note {
-  margin-top: 12px;        /* ✅ 拉開和卡片的距離，避免壓在裝飾上 */
+  margin-top: 12px;
   font-size: 11px;
   color: var(--text-muted);
-  line-height: 1.6;        /* ✅ 行距拉開，可讀性更好 */
+  line-height: 1.6;
 }
 
 .source-note a {
