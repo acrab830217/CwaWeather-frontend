@@ -43,6 +43,8 @@
     <div id="weather" class="card"></div>
 
     <script>
+      const API_BASE = "http://localhost:3000"; // 若後端不是 3000 port，這裡要一起改
+
       // ✅ 1. 頁面載入時先取得定位
       window.addEventListener("load", () => {
         const statusEl = document.getElementById("status");
@@ -51,7 +53,6 @@
         if (!navigator.geolocation) {
           statusEl.textContent =
             "此瀏覽器不支援定位功能，改用預設城市（台北市）。";
-          // 沒有定位就用預設城市
           fetchWeatherByCity("台北市");
           return;
         }
@@ -65,36 +66,51 @@
               4
             )}, ${longitude.toFixed(4)}`;
 
-            // ⬇️ 這裡有兩個選擇 ⬇️
-            // 先用簡單版：直接選一個你想測試的城市
-            const city = "高雄市";
-            // 進階版：等你之後要真的用座標換縣市，再把上面那行改成：
-            // const city = await getCityFromCoords(latitude, longitude);
+            // ✅ 這裡改成真的用座標換城市（呼叫後端 /api/reverse-geocode）
+            const city = await getCityFromCoords(latitude, longitude);
 
+            if (!city) {
+              statusEl.textContent += "（無法判斷城市，改用台北市）";
+              fetchWeatherByCity("台北市");
+              return;
+            }
+
+            statusEl.textContent += `（判斷城市：${city}）`;
             fetchWeatherByCity(city);
           },
           (error) => {
             console.error("取得定位失敗：", error);
             statusEl.textContent =
               "無法取得您的位置，改用預設城市（台北市）。";
-            // 抓不到位置就用預設城市
             fetchWeatherByCity("台北市");
           }
         );
       });
 
-      // ✅ 2. 呼叫你剛剛做好的後端 /api/weather?city=xxx
+      // ✅ 2. 呼叫後端 /api/weather?city=xxx
       async function fetchWeatherByCity(city) {
         const weatherEl = document.getElementById("weather");
         weatherEl.innerHTML = `正在載入 ${city} 的天氣資料...`;
 
         try {
           const res = await fetch(
-            `http://localhost:3000/api/weather?city=${encodeURIComponent(city)}`
+            `${API_BASE}/api/weather?city=${encodeURIComponent(city)}`
           );
+
+          if (!res.ok) {
+            const text = await res.text();
+            console.error("weather API HTTP error:", res.status, text);
+            weatherEl.innerHTML =
+              '<div class="error">取得天氣失敗（HTTP ' +
+              res.status +
+              "）</div>";
+            return;
+          }
+
           const json = await res.json();
 
           if (!json.success) {
+            console.warn("weather API 回傳失敗：", json);
             weatherEl.innerHTML =
               '<div class="error">取得天氣失敗：' +
               (json.message || "未知錯誤") +
@@ -104,7 +120,7 @@
 
           renderWeather(json.data);
         } catch (err) {
-          console.error(err);
+          console.error("fetchWeatherByCity 發生錯誤：", err);
           weatherEl.innerHTML =
             '<div class="error">無法連線到伺服器，請確認後端是否有啟動。</div>';
         }
@@ -113,6 +129,12 @@
       // ✅ 3. 把後端回傳的資料顯示出來
       function renderWeather(data) {
         const weatherEl = document.getElementById("weather");
+
+        if (!data || !Array.isArray(data.forecasts)) {
+          weatherEl.innerHTML =
+            '<div class="error">天氣資料格式錯誤，請稍後再試。</div>';
+          return;
+        }
 
         const forecasts = data.forecasts.slice(0, 3); // 先顯示前 3 筆預報就好
 
@@ -141,11 +163,37 @@
         weatherEl.innerHTML = html;
       }
 
-      // 🔁 進階版預留：用座標換縣市（目前先不啟用）
+      // ✅ 4. 用經緯度問後端 /api/reverse-geocode，得到縣市名稱
       async function getCityFromCoords(lat, lng) {
-        // 這裡預留位置給你之後串 Geocoding API（例如 Google / OpenStreetMap）
-        // 先回傳一個預設值，確認整體流程沒問題：
-        return "高雄市";
+        try {
+          const url = `${API_BASE}/api/reverse-geocode?lat=${lat}&lng=${lng}`;
+          console.log("呼叫 reverse-geocode:", url);
+
+          const res = await fetch(url);
+
+          if (!res.ok) {
+            const text = await res.text();
+            console.error(
+              "reverse-geocode HTTP 錯誤:",
+              res.status,
+              text
+            );
+            return null;
+          }
+
+          const json = await res.json();
+
+          if (!json.success) {
+            console.warn("reverse-geocode 回傳失敗：", json);
+            return null;
+          }
+
+          console.log("reverse-geocode 結果 city =", json.city);
+          return json.city;
+        } catch (err) {
+          console.error("getCityFromCoords 發生錯誤：", err);
+          return null;
+        }
       }
     </script>
   </body>
