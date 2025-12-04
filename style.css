@@ -1,0 +1,156 @@
+/* ===== Memphis 幾何風：變數設定 ===== */
+:root {
+  --bg-color: #fff7ed; /* 淺奶油底 */
+  --card-bg: #ffffff; /* 卡片白底 */
+  --primary: #111827; /* 主文字深灰近黑 */
+  --primary-accent: #22c7b8; /* 藍綠亮色 */
+  --accent-pink: #fb7185; /* 粉紅 */
+  --accent-yellow: #fde047; /* 黃色 */
+  --accent-purple: #a855f7; /* 紫色 */
+  --text-main: #111827;
+  --text-muted: #6b7280;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* 防止水平捲動 */
+}
+
+/* 背景：淡底 + 漸層圓形光暈 */
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: var(--bg-color);
+  background-image: radial-gradient(
+      circle at 10% 20%,
+      rgba(248, 250, 252, 0.8) 0,
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba(248, 250, 252, 0.9) 0,
+      transparent 55%
+    );
+  color: var(--text-main);
+}
+
+/* ===== 主容器 ===== */
+.app-container {
+  width: 100%;
+  max-width: 960px;
+  padding: 24px 16px 40px;
+  position: relative;
+  overflow: hidden; /* 避免裝飾超出造成 X 向捲軸 */
+}
+
+/* 左上角三角形裝飾 */
+.app-container::before {
+  content: "";
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  top: -20px;
+  left: 8px;
+  z-index: -1;
+  background: linear-gradient(
+    135deg,
+    var(--accent-yellow) 0 50%,
+    transparent 50% 100%
+  );
+}
+
+/* 右下角點點方塊裝飾 */
+.app-container::after {
+  content: "";
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  right: 8px;
+  bottom: -10px;
+  z-index: -1;
+  background-color: #0f172a;
+  background-image: radial-gradient(circle, #f9fafb 2px, transparent 2px);
+  background-size: 10px 10px;
+}
+
+/* ===== 頁首 ===== */
+h1 {
+  font-size: 22px;
+  margin: 0 0 8px;
+  letter-spacing: 0.04em;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+#status,
+#location {
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  word-break: break-word;
+}
+
+/* ===== 控制區（縣市選單） ===== */
+.controls {
+  margin: 16px 0 18px;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 2px solid #111827;
+  box-shadow: 0 6px 0 #0f172a;
+}
+
+.controls label {
+  font-size: 12px;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+#citySelect {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 2px solid #111827;
+  background-color: #f9fafb;
+  font-size: 13px;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+#citySelect:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #111827;
+  background-color: #ffffff;
+}
+
+/* ===== 天氣卡片 ===== */
+.card {
+  background-color: var(--card-bg);
+  border-radius: 22px;
+  padding: 20px 20px 18px;
+  border: 3px solid #111827;
+  box-shadow: 0 12px 0 #0f172a; /* 漫畫感投影 */
+  position: relative;
+  overflow: hidden;
+
+  opacity: 0;
+  transform: transl

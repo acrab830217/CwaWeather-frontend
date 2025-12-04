@@ -10,140 +10,31 @@
     />
     <!-- 響應式視窗設定 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      /* 確保在 320 / 768 / 1440 都不會水平捲動 */
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        overflow-x: hidden;
-      }
-
-      *,
-      *::before,
-      *::after {
-        box-sizing: inherit;
-      }
-
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        padding: 16px;
-        background: #f5f5f5;
-      }
-
-      .page-wrapper {
-        max-width: 960px;
-        margin: 0 auto;
-      }
-
-      .card {
-        background: white;
-        border-radius: 8px;
-        padding: 16px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 700px;
-      }
-
-      h1 {
-        font-size: 1.5rem;
-        margin: 0 0 12px;
-        word-break: break-word;
-      }
-
-      #status,
-      #location {
-        font-size: 0.9rem;
-        margin-bottom: 4px;
-        word-break: break-word;
-      }
-
-      .city {
-        font-size: 1.25rem;
-        font-weight: bold;
-        margin-bottom: 8px;
-        word-break: break-word;
-      }
-
-      .meta {
-        font-size: 0.8rem;
-        color: #666;
-        margin-bottom: 12px;
-        word-break: break-word;
-      }
-
-      .error {
-        color: #c00;
-        font-weight: bold;
-      }
-
-      ul {
-        padding-left: 20px;
-        margin: 0;
-      }
-
-      li {
-        list-style: disc;
-      }
-
-      .controls {
-        margin: 12px 0;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 8px;
-      }
-
-      label {
-        font-size: 0.9rem;
-        margin-right: 4px;
-        white-space: nowrap;
-      }
-
-      select {
-        padding: 4px 8px;
-        max-width: 100%;
-      }
-
-      /* 小螢幕優化（320px ~ 480px） */
-      @media (max-width: 480px) {
-        body {
-          padding: 12px;
-        }
-
-        .card {
-          padding: 12px;
-        }
-
-        h1 {
-          font-size: 1.25rem;
-        }
-      }
-
-      /* 中型螢幕（平板） */
-      @media (min-width: 768px) {
-        h1 {
-          font-size: 1.75rem;
-        }
-      }
-    </style>
+    <!-- 外部 CSS -->
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="page-wrapper">
+    <div class="app-container">
       <h1>目前地點天氣</h1>
+      <div class="subtitle">
+        自動偵測你目前位置，抓出距離最近的縣市，幫你查 36 小時內的天氣預報。
+      </div>
+
       <div id="status">正在取得您的位置...</div>
       <div id="location"></div>
 
       <div class="controls">
-        <label for="citySelect">縣市：</label>
+        <label for="citySelect">縣市</label>
         <select id="citySelect">
           <option value="">自動偵測中...</option>
         </select>
       </div>
 
-      <div id="weather" class="card"></div>
+      <div class="hint">
+        預設會用你的定位找最近的縣市，你也可以自己改選上方縣市下拉選單。
+      </div>
+
+      <div id="weather" class="card" style="margin-top: 16px;"></div>
     </div>
 
     <script>
@@ -176,14 +67,14 @@
         { name: "屏東縣", lat: 22.6828017, lng: 120.487928 },
       ];
 
-      // 頁面載入：初始化選單 + 自動偵測
+      // 頁面載入：初始化選單 + 每次都自動偵測
       window.addEventListener("load", () => {
         const statusEl = document.getElementById("status");
         const locationEl = document.getElementById("location");
         const citySelect = document.getElementById("citySelect");
 
         // 1. 填入所有縣市選項
-        citySelect.innerHTML = ""; // 清空原本的「自動偵測中...」
+        citySelect.innerHTML = ""; // 清空原本的占位文字
         CITY_COORDS.forEach((c) => {
           const opt = document.createElement("option");
           opt.value = c.name;
@@ -191,7 +82,7 @@
           citySelect.appendChild(opt);
         });
 
-        // 2. 綁定「手動選縣市」事件：只更新畫面，不記錄
+        // 2. 手動選縣市事件：只更新畫面，不記錄
         citySelect.addEventListener("change", (e) => {
           const city = e.target.value;
           if (!city) return;
@@ -199,7 +90,7 @@
           fetchWeatherByCity(city);
         });
 
-        // 3. 每次進來都用定位 + 最近縣市（不記錄到 localStorage）
+        // 3. 每次進來都用定位 + 最近縣市
         autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
       });
 
@@ -262,7 +153,7 @@
         CITY_COORDS.forEach((c) => {
           const dLat = lat - c.lat;
           const dLng = lng - c.lng;
-          const dist = dLat * dLat + dLng * dLng; // 不開根號也可以，比較大小就好
+          const dist = dLat * dLat + dLng * dLng;
 
           if (dist < minDist) {
             minDist = dist;
@@ -324,7 +215,7 @@
           return;
         }
 
-        const forecasts = data.forecasts.slice(0, 3); // 先顯示前 3 筆預報
+        const forecasts = data.forecasts.slice(0, 3); // 顯示前 3 筆預報
 
         let html = `
           <div class="city">${data.city}</div>
@@ -335,13 +226,12 @@
         forecasts.forEach((f) => {
           html += `
             <li>
-              <div><strong>${f.startTime} ~ ${f.endTime}</strong></div>
+              <div>${f.startTime} ~ ${f.endTime}</div>
               <div>天氣：${f.weather}</div>
               <div>氣溫：${f.minTemp} - ${f.maxTemp}</div>
               <div>降雨機率：${f.rain}</div>
               <div>舒適度：${f.comfort}</div>
             </li>
-            <br/>
           `;
         });
 
