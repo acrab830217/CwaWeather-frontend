@@ -246,24 +246,56 @@ h1 {
   margin-bottom: 10px;
 }
 
-ul {
-  padding-left: 18px;
+/* 預報列表：自訂樣式，方便高亮 */
+.forecast-list {
+  list-style: none;
+  padding-left: 0;
   margin: 0;
 }
 
-li {
-  list-style: disc;
-  margin-bottom: 6px;
+.forecast-item {
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  position: relative;
 }
 
-li > div {
+.forecast-item > div {
   font-size: 13px;
   line-height: 1.5;
 }
 
-li > div:first-child {
+.forecast-item > div:first-child {
   font-weight: 600;
   margin-bottom: 2px;
+}
+
+/* 目前時間所在區間：加色塊高亮 */
+.forecast-item.current {
+  border-color: #111827;
+  background: linear-gradient(
+    135deg,
+    rgba(253, 224, 71, 0.32),
+    rgba(34, 199, 184, 0.38)
+  );
+  box-shadow: 0 3px 0 rgba(15, 23, 42, 0.5);
+}
+
+.forecast-item.current::before {
+  content: "NOW";
+  position: absolute;
+  top: -9px;
+  right: 12px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background-color: #111827;
+  color: #f9fafb;
 }
 
 .error {
@@ -348,19 +380,31 @@ li > div:first-child {
   color: #111827;
 }
 
-/* 地圖主體：用你提供的台灣圖 */
+/* 地圖主體：參考 CWA 直立島型，但用 CSS 畫 */
 .map-box {
   position: relative;
   border-radius: 18px;
   border: 2px solid #111827;
   background-color: #0f172a;
-  background-image: url("https://s2.eslite.com/unsafe/fit-in/x900/s.eslite.com/Upload/Product/201907/o/636985171083638750.jpg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
   overflow: hidden;
   min-height: 260px;
   margin-bottom: 8px;
+}
+
+/* 台灣島輪廓：一個旋轉的長橢圓，加一點漸層 */
+.map-island {
+  position: absolute;
+  inset: 18px 40px;
+  border-radius: 999px;
+  border: 2px solid #f9fafb;
+  background-image: linear-gradient(
+    135deg,
+    #1f2937 0%,
+    #0f172a 40%,
+    #111827 100%
+  );
+  transform: rotate(-14deg);
+  opacity: 0.95;
 }
 
 /* 點點容器 */
@@ -519,10 +563,6 @@ li > div:first-child {
   .card {
     padding: 18px 14px 16px;
     box-shadow: 0 10px 0 #0f172a;
-  }
-
-  ul {
-    padding-left: 16px;
   }
 }
 

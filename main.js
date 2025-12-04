@@ -29,6 +29,30 @@ const CITY_COORDS = [
   { name: "屏東縣", lat: 22.6828017, lng: 120.487928 },
 ];
 
+// 舒適度 -> 可愛文案 mapping
+function getComfortCuteText(comfort) {
+  // 常見 CI 文字可能有：舒適、悶熱、炎熱、稍有寒意、寒冷、舒適到悶熱 等
+  if (!comfort) return "好好照顧自己，記得多補充水分喔 🧃";
+
+  if (comfort.includes("舒適")) {
+    return "溫度剛剛好，很適合出門散步或喝杯咖啡 ☕";
+  }
+  if (comfort.includes("稍有寒意") || comfort.includes("偏冷")) {
+    return "有一點涼，出門記得帶件外套，會更舒服 🧣";
+  }
+  if (comfort.includes("寒冷")) {
+    return "有點冷颼颼，適合窩在被窩裡追劇，記得保暖 ❄️";
+  }
+  if (comfort.includes("悶熱")) {
+    return "空氣有點黏黏的，多喝水、找個涼的地方休息一下吧 💦";
+  }
+  if (comfort.includes("炎熱") || comfort.includes("酷熱")) {
+    return "外面超級熱，記得防曬、多補充水分，別曬昏頭 🔥";
+  }
+
+  return "今天的天氣有自己的個性，照自己的步調，好好過一天吧 🌈";
+}
+
 window.addEventListener("load", () => {
   const statusEl = document.getElementById("status");
   const locationEl = document.getElementById("location");
@@ -172,7 +196,7 @@ async function fetchWeatherByCity(city) {
   }
 }
 
-// 把天氣資料畫到畫面上
+// 把天氣資料畫到畫面上（含自動高亮現在時段）
 function renderWeather(data) {
   const weatherEl = document.getElementById("weather");
 
@@ -183,16 +207,23 @@ function renderWeather(data) {
   }
 
   const forecasts = data.forecasts.slice(0, 3); // 顯示前 3 筆預報
+  const now = new Date();
 
   let html = `
     <div class="city">${data.city}</div>
     <div class="meta">資料描述：${data.updateTime}</div>
-    <ul>
+    <ul class="forecast-list">
   `;
 
   forecasts.forEach((f) => {
+    // 把 "YYYY-MM-DD HH:mm:ss" 轉成瀏覽器可解析的時間字串
+    const start = new Date(f.startTime.replace(" ", "T"));
+    const end = new Date(f.endTime.replace(" ", "T"));
+
+    const isCurrent = now >= start && now < end;
+
     html += `
-      <li>
+      <li class="forecast-item ${isCurrent ? "current" : ""}">
         <div>${f.startTime} ~ ${f.endTime}</div>
         <div>天氣：${f.weather}</div>
         <div>氣溫：${f.minTemp} - ${f.maxTemp}</div>
@@ -219,17 +250,18 @@ function updateTodaySummary(data) {
 
   const baseLine = `${data.city}：${first.weather}，氣溫 ${first.minTemp} – ${first.maxTemp}，降雨機率 ${first.rain}，舒適度 ${first.comfort}`;
   const comfortSentence = `今天是個「${first.comfort}」的天氣，祝你有個美好的一天~~`;
+  const cuteText = getComfortCuteText(first.comfort);
 
+  // ✅ 小卡只顯示「今日概況」，不顯示 comfortSentence
   summaryCard.innerHTML = `
     <div class="summary-title">今天概況重點</div>
     <div class="summary-main">
       <p>${baseLine}</p>
-      <p>${comfortSentence}</p>
     </div>
   `;
   summaryCard.classList.remove("hidden");
 
-  // 第一次載入該頁時，顯示浮動視窗
+  // ✅ 浮動視窗才顯示「今天是個『舒適度』...」＋ 可愛文案
   if (!hasShownModal) {
     const modal = document.getElementById("todayModal");
     const modalContent = document.getElementById("modalContent");
@@ -238,6 +270,7 @@ function updateTodaySummary(data) {
         <p>目前偵測到你所在位置為 <strong>${data.city}</strong>。</p>
         <p>這個時段的預報是：<strong>${first.weather}</strong>，氣溫約 <strong>${first.minTemp} – ${first.maxTemp}</strong>，降雨機率 <strong>${first.rain}</strong>，體感 <strong>${first.comfort}</strong>。</p>
         <p>${comfortSentence}</p>
+        <p>${cuteText}</p>
       `;
       modal.classList.add("show");
       hasShownModal = true;
