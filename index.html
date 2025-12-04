@@ -15,7 +15,7 @@
         border-radius: 8px;
         padding: 16px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        max-width: 600px;
+        max-width: 700px;
       }
       .city {
         font-size: 20px;
@@ -34,31 +34,98 @@
       ul {
         padding-left: 20px;
       }
+      .controls {
+        margin-bottom: 12px;
+      }
+      label {
+        font-size: 14px;
+        margin-right: 8px;
+      }
+      select {
+        padding: 4px 8px;
+      }
     </style>
   </head>
   <body>
     <h1>目前地點天氣</h1>
     <div id="status">正在取得您的位置...</div>
     <div id="location"></div>
+
+    <div class="controls">
+      <label for="citySelect">縣市：</label>
+      <select id="citySelect">
+        <option value="">自動偵測中...</option>
+      </select>
+    </div>
+
     <div id="weather" class="card"></div>
 
     <script>
-      const API_BASE = "http://localhost:3000"; // 若後端不是 3000 port，這裡要一起改
+      const API_BASE = "http://localhost:3000"; // 後端網址／port
 
-      // ✅ 1. 頁面載入時先取得定位
+      // ✅ 台灣各縣市基準座標（約略中心點即可）
+      const CITY_COORDS = [
+        { name: "宜蘭縣", lat: 24.7302791, lng: 121.7631149 },
+        { name: "花蓮縣", lat: 23.9913421, lng: 121.6197276 },
+        { name: "臺東縣", lat: 22.7553667, lng: 121.1506 },
+        { name: "澎湖縣", lat: 23.569694, lng: 119.5664543 },
+        { name: "金門縣", lat: 24.4480637, lng: 118.3856331 },
+        { name: "連江縣", lat: 26.1491915, lng: 119.9389047 },
+        { name: "臺北市", lat: 25.0478, lng: 121.5319 },
+        { name: "新北市", lat: 25.06199, lng: 121.45703 },
+        { name: "桃園市", lat: 24.9937, lng: 121.297 },
+        { name: "臺中市", lat: 24.1469, lng: 120.6839 },
+        { name: "臺南市", lat: 22.99083, lng: 120.21333 },
+        { name: "高雄市", lat: 22.61626, lng: 120.31333 },
+        { name: "基隆市", lat: 25.1283, lng: 121.742 },
+        { name: "新竹縣", lat: 24.8267, lng: 121.0128333 },
+        { name: "新竹市", lat: 24.80361, lng: 120.96861 },
+        { name: "苗栗縣", lat: 24.5647667, lng: 120.8205167 },
+        { name: "彰化縣", lat: 24.0755667, lng: 120.5444667 },
+        { name: "南投縣", lat: 23.90235, lng: 120.6909167 },
+        { name: "雲林縣", lat: 23.6990775, lng: 120.5245511 },
+        { name: "嘉義縣", lat: 23.46333, lng: 120.58166 },
+        { name: "嘉義市", lat: 23.47917, lng: 120.44889 },
+        { name: "屏東縣", lat: 22.6828017, lng: 120.487928 },
+      ];
+
+      const DEFAULT_CITY = "臺北市";
+
+      // ✅ 頁面載入：先把下拉選單塞選項，然後做定位
       window.addEventListener("load", () => {
         const statusEl = document.getElementById("status");
         const locationEl = document.getElementById("location");
+        const citySelect = document.getElementById("citySelect");
 
+        // 1. 填入所有縣市選項
+        CITY_COORDS.forEach((c) => {
+          const opt = document.createElement("option");
+          opt.value = c.name;
+          opt.textContent = c.name;
+          citySelect.appendChild(opt);
+        });
+
+        // 2. 綁定「手動選縣市」事件
+        citySelect.addEventListener("change", (e) => {
+          const city = e.target.value;
+          if (!city) return;
+          statusEl.textContent = `已選擇：${city}`;
+          fetchWeatherByCity(city);
+        });
+
+        // 3. 取定位，算最近縣市
         if (!navigator.geolocation) {
           statusEl.textContent =
-            "此瀏覽器不支援定位功能，改用預設城市（台北市）。";
-          fetchWeatherByCity("台北市");
+            "此瀏覽器不支援定位功能，改用預設城市（" +
+            DEFAULT_CITY +
+            "）。";
+          citySelect.value = DEFAULT_CITY;
+          fetchWeatherByCity(DEFAULT_CITY);
           return;
         }
 
         navigator.geolocation.getCurrentPosition(
-          async (position) => {
+          (position) => {
             const { latitude, longitude } = position.coords;
 
             statusEl.textContent = "已取得您的位置 ✅";
@@ -66,28 +133,52 @@
               4
             )}, ${longitude.toFixed(4)}`;
 
-            // ✅ 這裡改成真的用座標換城市（呼叫後端 /api/reverse-geocode）
-            const city = await getCityFromCoords(latitude, longitude);
+            const nearest = getNearestCity(latitude, longitude);
 
-            if (!city) {
-              statusEl.textContent += "（無法判斷城市，改用台北市）";
-              fetchWeatherByCity("台北市");
+            if (!nearest) {
+              statusEl.textContent +=
+                "（無法判斷最近縣市，改用 " + DEFAULT_CITY + "）";
+              citySelect.value = DEFAULT_CITY;
+              fetchWeatherByCity(DEFAULT_CITY);
               return;
             }
 
-            statusEl.textContent += `（判斷城市：${city}）`;
-            fetchWeatherByCity(city);
+            statusEl.textContent += `（最近縣市：${nearest.name}）`;
+            citySelect.value = nearest.name;
+            fetchWeatherByCity(nearest.name);
           },
           (error) => {
             console.error("取得定位失敗：", error);
             statusEl.textContent =
-              "無法取得您的位置，改用預設城市（台北市）。";
-            fetchWeatherByCity("台北市");
+              "無法取得您的位置，改用預設城市（" +
+              DEFAULT_CITY +
+              "）。";
+            citySelect.value = DEFAULT_CITY;
+            fetchWeatherByCity(DEFAULT_CITY);
           }
         );
       });
 
-      // ✅ 2. 呼叫後端 /api/weather?city=xxx
+      // ✅ 使用簡單「平面距離」找最近縣市（台灣範圍內已經夠用）
+      function getNearestCity(lat, lng) {
+        let nearest = null;
+        let minDist = Infinity;
+
+        CITY_COORDS.forEach((c) => {
+          const dLat = lat - c.lat;
+          const dLng = lng - c.lng;
+          const dist = dLat * dLat + dLng * dLng; // 不開根號也可以，比較大小就好
+
+          if (dist < minDist) {
+            minDist = dist;
+            nearest = c;
+          }
+        });
+
+        return nearest;
+      }
+
+      // ✅ 呼叫後端 /api/weather?city=xxx
       async function fetchWeatherByCity(city) {
         const weatherEl = document.getElementById("weather");
         weatherEl.innerHTML = `正在載入 ${city} 的天氣資料...`;
@@ -126,7 +217,7 @@
         }
       }
 
-      // ✅ 3. 把後端回傳的資料顯示出來
+      // ✅ 把後端回傳的資料顯示出來
       function renderWeather(data) {
         const weatherEl = document.getElementById("weather");
 
@@ -136,7 +227,7 @@
           return;
         }
 
-        const forecasts = data.forecasts.slice(0, 3); // 先顯示前 3 筆預報就好
+        const forecasts = data.forecasts.slice(0, 3); // 先顯示前 3 筆預報
 
         let html = `
           <div class="city">${data.city}</div>
@@ -161,39 +252,6 @@
         html += "</ul>";
 
         weatherEl.innerHTML = html;
-      }
-
-      // ✅ 4. 用經緯度問後端 /api/reverse-geocode，得到縣市名稱
-      async function getCityFromCoords(lat, lng) {
-        try {
-          const url = `${API_BASE}/api/reverse-geocode?lat=${lat}&lng=${lng}`;
-          console.log("呼叫 reverse-geocode:", url);
-
-          const res = await fetch(url);
-
-          if (!res.ok) {
-            const text = await res.text();
-            console.error(
-              "reverse-geocode HTTP 錯誤:",
-              res.status,
-              text
-            );
-            return null;
-          }
-
-          const json = await res.json();
-
-          if (!json.success) {
-            console.warn("reverse-geocode 回傳失敗：", json);
-            return null;
-          }
-
-          console.log("reverse-geocode 結果 city =", json.city);
-          return json.city;
-        } catch (err) {
-          console.error("getCityFromCoords 發生錯誤：", err);
-          return null;
-        }
       }
     </script>
   </body>
