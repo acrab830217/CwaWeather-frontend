@@ -837,13 +837,12 @@ h1 {
   }
 }
 
-/* ✅ 桌機版 */
+/* ✅ 桌機版：整頁與左右欄都不捲動 */
 @media (min-width: 1024px) {
   html,
   body {
-    /* 原本是 height: 100vh; overflow: hidden; 會把左邊整個裁掉 */
-    min-height: 100vh;    /* 高度至少跟視窗一樣高 */
-    overflow-y: auto;     /* 允許內容超過時往下捲，不會被吃掉 */
+    height: 100vh;
+    overflow: hidden; /* 整頁不出現 y 軸 */
   }
 
   body {
@@ -851,8 +850,7 @@ h1 {
   }
 
   .app-container {
-    /* 原本是 height: 100vh; 會被卡得太死 */
-    min-height: 100vh;
+    height: 100vh;
     padding: 14px 14px 14px;
     display: flex;
     flex-direction: column;
@@ -864,17 +862,16 @@ h1 {
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
     gap: 18px;
     align-items: stretch;
-    /* ❌ 這個 hidden 會讓左邊被「切掉」，改成 visible */
-    overflow: visible;
+    overflow: hidden;
   }
 
   .left-pane,
   .map-panel {
     height: 100%;
-    overflow: visible; /* 交給外層 body 處理捲動就好 */
+    overflow: hidden;
   }
 
-  /* 左邊整欄外框卡片風格 */
+  /* ✅ 左邊整欄包進一張大卡，視覺上跟右邊 map-panel 對齊 */
   .left-pane {
     display: flex;
     flex-direction: column;
@@ -885,24 +882,22 @@ h1 {
     padding: 12px 14px 10px;
   }
 
-  /* 讓 #weather 撐開剩餘空間 */
   .left-pane > #weather {
     flex: 1;
   }
-}  /* ⬅️ 這個大括號一定要存在，代表 @media 的結尾 */
 
 /* ===== 資料來源說明（桌機＋手機共用基礎）===== */
 .source-note {
   margin-top: 12px;
   margin-bottom: 4px;
-  font-size: 11px;                 
+  font-size: 11px;                 /* ✅ 跟上面說明文字一致 */
   color: var(--text-muted);
   line-height: 1.7;
-  max-width: 760px;                
+  max-width: 760px;                /* 不讓一行太長，閱讀比較舒服 */
 }
 
 .source-note a {
-  color: #111827;                  
+  color: #111827;                  /* 比預設亮藍色柔和一點 */
   text-decoration: underline;
   text-decoration-thickness: 0.08em;
 }
