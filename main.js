@@ -301,10 +301,10 @@ function renderWeather(data) {
   const now = new Date();
 
   let html = `
-    <div class="city">${data.city}</div>
-    <div class="meta">資料描述：${data.updateTime}</div>
-    <ul class="forecast-list">
-  `;
+  <div class="city">${data.city}</div>
+  <div class="meta">資料描述：未來三十六小時天氣預報</div>
+  <ul class="forecast-list">
+`;
 
   forecasts.forEach((f) => {
     // 用 start / end 判斷現在時間在哪一段
