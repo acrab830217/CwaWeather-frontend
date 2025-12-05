@@ -300,13 +300,12 @@ h1 {
   }
 }
 
-  /* 下拉式選單本身的樣式（讓它看起來和 pill 一致） */
-  #citySelect {
-    border-radius: 999px;
-    border: 2px solid #111827;
-    box-shadow: 0 4px 0 #111827;
-    background-color: #ffffff;
-  }
+/* 下拉式選單本身的樣式（讓它看起來和 pill 一致） */
+#citySelect {
+  border-radius: 999px;
+  border: 2px solid #111827;
+  box-shadow: 0 4px 0 #111827;
+  background-color: #ffffff;
 }
 
 /* 共同的 pill 風格（日期＋分享共用） */
