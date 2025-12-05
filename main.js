@@ -308,7 +308,7 @@ function updateTodayBadge() {
   const weekdayNames = ["日", "一", "二", "三", "四", "五", "六"];
   const weekday = weekdayNames[now.getDay()];
 
-  badge.textContent = `今天 ${mm}/${dd}（${weekday}）`;
+  badge.textContent = `📅 今天 ${mm}/${dd}（${weekday}）`;
 }
 
 function formatTimeRange(startStr, endStr) {
