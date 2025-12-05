@@ -742,12 +742,6 @@ h1 {
   line-height: 1.6;
 }
 
-/* ✅ 調整按鈕的上下間距，讓它跟上、下文字距離比較平均 */
-.modal-button {
-  margin: 14px 0 12px;
-  width: 100%;
-}
-
 .modal-close {
   position: absolute;
   top: 8px;
@@ -783,7 +777,9 @@ h1 {
   margin-bottom: 2px;       /* ✅ 跟底部邊界保持距離 */
 }
 
+/* ✅ 調整按鈕的上下間距，讓它跟上、下文字距離比較平均 */
 .modal-button {
+  margin: 14px 0 12px;
   width: 100%;
   padding: 8px 12px;
   border-radius: 999px;
@@ -879,19 +875,20 @@ h1 {
   .left-pane > #weather {
     flex: 1;
   }
+}  /* ✅ 在這裡關掉 @media (min-width: 1024px) */
 
 /* ===== 資料來源說明（桌機＋手機共用基礎）===== */
 .source-note {
   margin-top: 12px;
   margin-bottom: 4px;
-  font-size: 11px;                 /* ✅ 跟上面說明文字一致 */
+  font-size: 11px;                 
   color: var(--text-muted);
   line-height: 1.7;
-  max-width: 760px;                /* 不讓一行太長，閱讀比較舒服 */
+  max-width: 760px;                
 }
 
 .source-note a {
-  color: #111827;                  /* 比預設亮藍色柔和一點 */
+  color: #111827;                  
   text-decoration: underline;
   text-decoration-thickness: 0.08em;
 }
