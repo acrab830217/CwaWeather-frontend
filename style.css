@@ -337,9 +337,16 @@ h1 {
 }
 
 .forecast-item .line1 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
   font-weight: 600;
-  margin-bottom: 2px;
+}
+
+.weather-icon {
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
 .forecast-item .line2 {
@@ -427,7 +434,17 @@ h1 {
 }
 
 .summary-main p {
-  margin: 1px 0;
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.summary-icon {
+  font-size: 18px;
+  flex-shrink: 0;
 }
 
 .hidden {
