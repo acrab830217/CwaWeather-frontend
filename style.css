@@ -279,16 +279,12 @@ h1 {
   /* 三顆按鈕統一高度、等寬縮放，避免超出邊界 */
   #citySelect,
   .date-badge,
-  #shareBtn {
+  #shareButton {
     flex: 1 1 0;
     min-width: 0;
     font-size: 13px;
     padding: 6px 10px;
-  }
-
-  /* 分享按鈕在手機上字少一點，不會太擠 */
-  #shareBtn {
-    justify-content: center;
+    justify-content: center; /* 分享按鈕在手機上字少一點，不會太擠 */
   }
 }
 
@@ -296,7 +292,7 @@ h1 {
 @media (max-width: 480px) {
   #citySelect,
   .date-badge,
-  #shareBtn {
+  #shareButton {
     font-size: 12px;
     padding: 5px 8px;
   }
