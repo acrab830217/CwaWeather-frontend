@@ -315,6 +315,8 @@ function updateTodayBadge() {
     : `📅 今天 ${mm}/${dd}（${weekday}）`; // 一般寬度：維持原本文案
 }
 
+window.addEventListener("resize", updateTodayBadge);
+
 function formatTimeRange(startStr, endStr) {
   // CWA 格式 "YYYY-MM-DD HH:mm:ss" -> 只留 HH:mm
   const startTime = startStr.slice(11, 16);
