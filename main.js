@@ -329,18 +329,22 @@ function updateTodaySummary(data) {
   }
 
   const first = data.forecasts[0];
+  const icon = getWeatherIcon(first.weather);   // ✅ 新增
   const summaryCard = document.getElementById("summaryCard");
   if (!summaryCard) return;
 
   const baseLine = `${data.city}：${first.weather}，氣溫 ${first.minTemp} – ${first.maxTemp}，降雨機率 ${first.rain}，舒適度 ${first.comfort}`;
   const cuteText = getComfortCuteText(first.comfort);
 
-  summaryCard.innerHTML = `
-    <div class="summary-title">今天概況重點</div>
-    <div class="summary-main">
-      <p>${baseLine}</p>
-    </div>
-  `;
+summaryCard.innerHTML = `
+  <div class="summary-title">今天概況重點</div>
+  <div class="summary-main">
+    <p>
+      <span class="summary-icon">${icon}</span>
+      <span>${baseLine}</span>
+    </p>
+  </div>
+`;
   summaryCard.classList.remove("hidden");
 
   if (!hasShownModal) {
@@ -348,10 +352,16 @@ function updateTodaySummary(data) {
     const modalContent = document.getElementById("modalContent");
     if (modal && modalContent) {
       modalContent.innerHTML = `
-        <p>目前偵測到你所在位置為 <strong>${data.city}</strong>。</p>
-        <p>這個時段的預報是：<strong>${first.weather}</strong>，氣溫約 <strong>${first.minTemp} – ${first.maxTemp}</strong>，降雨機率 <strong>${first.rain}</strong>，體感 <strong>${first.comfort}</strong>。</p>
-        <p class="modal-cute-text">${cuteText}</p>
-      `;
+  <p>目前偵測到你所在位置為 <strong>${data.city}</strong>。</p>
+  <p>
+    <span class="summary-icon">${icon}</span>
+    這個時段的預報是：<strong>${first.weather}</strong>，
+    氣溫約 <strong>${first.minTemp} – ${first.maxTemp}</strong>，
+    降雨機率 <strong>${first.rain}</strong>，
+    體感 <strong>${first.comfort}</strong>。
+  </p>
+  <p class="modal-cute-text">${cuteText}</p>
+`;
       modal.classList.add("show");
       hasShownModal = true;
     }
