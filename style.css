@@ -259,28 +259,46 @@ h1 {
   flex-wrap: wrap;
 }
 
-/* 手機版：三顆按鈕同一排，大小比較一致、不會撞到邊緣 */
-@media (max-width: 480px) {
+/* ====== 手機版：上方三顆控制按鈕 ====== */
+@media (max-width: 768px) {
   .controls {
+    display: flex;
+    align-items: center;
     gap: 8px;
-    flex-wrap: nowrap;         /* ✅ 不要換行 */
+    margin-top: 10px;
   }
 
   .controls label {
     font-size: 13px;
-    flex: 0 0 auto;
-    margin-right: 2px;
+    margin-right: 4px;
+    white-space: nowrap;
   }
 
-  /* 三顆都吃一樣的高度與字級 */
+  /* 三顆按鈕統一高度、等寬縮放，避免超出邊界 */
   #citySelect,
   .date-badge,
-  .share-btn {
-    flex: 1 1 0;               /* ✅ 平均分配寬度，比較整齊 */
-    font-size: 14px;
-    padding: 6px 8px;
-    white-space: nowrap;       /* 不要自動換行，避免高度暴增 */
+  #shareBtn {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 13px;
+    padding: 6px 10px;
   }
+
+  /* 分享按鈕在手機上字少一點，不會太擠 */
+  #shareBtn {
+    justify-content: center;
+  }
+}
+
+/* 如果你有另外一個更窄的斷點（例如 480px），也可以再壓一次字體 */
+@media (max-width: 480px) {
+  #citySelect,
+  .date-badge,
+  #shareBtn {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+}
 
   /* 下拉式選單本身的樣式（讓它看起來和 pill 一致） */
   #citySelect {
@@ -428,20 +446,57 @@ h1 {
   margin-bottom: 6px;
 }
 
-/* 預報列表（3 筆、壓成 2 行） */
+/* ====== 預報列表：每一筆 ====== */
 .forecast-list {
   list-style: none;
-  padding-left: 0;
-  margin: 0;
+  padding: 0;
+  margin: 8px 0 0;
 }
 
 .forecast-item {
-  border-radius: 10px;
-  padding: 6px 10px;
-  margin-bottom: 6px;
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  position: relative;
+  position: relative;          /* ✅ 給 NOW 圖塊當定位基準 */
+  padding: 8px 14px;
+  border-radius: 16px;
+  border: 2px solid #e5e7eb;
+  background-color: #ffffff;
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ✅ 目前時段：底色 + 外框加粗 */
+.forecast-item.current {
+  border-color: #111827;
+  background-image: linear-gradient(135deg, #fef9c3, #bbf7d0);
+}
+
+/* ✅ 右上角 NOW 小標籤（只在 current 出現） */
+.forecast-item.current::after {
+  content: "NOW";
+  position: absolute;
+  top: 6px;
+  right: 14px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  background-color: #020617;
+  color: #f9fafb;
+  border: 2px solid #020617;
+}
+
+.forecast-item .line1 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.forecast-item .line2 {
+  color: #4b5563;
+  font-size: 12px;
 }
 
 .forecast-item .line1 {
@@ -460,47 +515,7 @@ h1 {
 .forecast-item .line2 {
   font-size: 11px;
   line-height: 1.4;
-}
-
-/* ✅ 現在時間所在時段：用色塊＋NOW 標籤強調 */
-.forecast-item {
-  position: relative;
-  /* 你原本的 padding / border-radius / background ... */
-}
-
-.forecast-item.current {
-  /* ✅ 當前時段的漸層底色 */
-  background: linear-gradient(90deg, #fef9c3, #a7f3d0);
-}
-
-/* ✅ 右上角的 NOW 色塊標籤 */
-.forecast-item.current::after {
-  content: "NOW";
-  position: absolute;
-  right: 18px;
-  top: 10px;
-  padding: 4px 14px;
-  border-radius: 999px;
-  background-color: #111827;
-  color: #ffffff;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-}
-
-/* 左側彩色條 */
-.forecast-item.current::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 4px;
-  bottom: 4px;
-  width: 4px;
-  border-radius: 4px;
-  background: linear-gradient(
-    180deg,
-    #f97316,
-    #ec4899
-  );
+  color: #4b5563;
 }
 
 .error {
