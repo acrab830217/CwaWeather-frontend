@@ -640,6 +640,16 @@ h1 {
   }
 }
 
+@media (max-width: 768px) {
+  .source-note {
+    margin-top: 10px;
+    font-size: 10px;          /* ✅ 手機再縮一階，不會搶畫面 */
+    line-height: 1.6;
+    padding-right: 6px;
+    padding-left: 2px;        /* 跟上方文字視覺對齊 */
+  }
+}
+
 /* ✅ 桌機版：整頁與左右欄都不捲動 */
 @media (min-width: 1024px) {
   html,
@@ -689,20 +699,20 @@ h1 {
     flex: 1;
   }
 
-/* ===== 資料來源說明（放在左欄下方） ===== */
+/* ===== 資料來源說明（桌機＋手機共用基礎）===== */
 .source-note {
-  margin-top: 16px;              /* 與上方卡片拉開一點 */
+  margin-top: 12px;
   margin-bottom: 4px;
-  font-size: 12px;               /* ✅ 字放大一點 */
+  font-size: 11px;                 /* ✅ 跟上面說明文字一致 */
   color: var(--text-muted);
-  line-height: 1.8;              /* ✅ 行距更舒適 */
-  max-width: 720px;              /* 避免一行太長，增加閱讀性 */
+  line-height: 1.7;
+  max-width: 760px;                /* 不讓一行太長，閱讀比較舒服 */
 }
 
 .source-note a {
-  color: #111827;
+  color: #111827;                  /* 比預設亮藍色柔和一點 */
   text-decoration: underline;
-  text-decoration-thickness: 1px;
+  text-decoration-thickness: 0.08em;
 }
 
 .source-note a:hover {
