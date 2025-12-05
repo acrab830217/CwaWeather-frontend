@@ -837,12 +837,13 @@ h1 {
   }
 }
 
-/* ✅ 桌機版：整頁與左右欄都不捲動 */
+/* ✅ 桌機版 */
 @media (min-width: 1024px) {
   html,
   body {
-    height: 100vh;
-    overflow: hidden; /* 整頁不要出現捲軸 */
+    /* 原本是 height: 100vh; overflow: hidden; 會把左邊整個裁掉 */
+    min-height: 100vh;    /* 高度至少跟視窗一樣高 */
+    overflow-y: auto;     /* 允許內容超過時往下捲，不會被吃掉 */
   }
 
   body {
@@ -850,7 +851,8 @@ h1 {
   }
 
   .app-container {
-    height: 100vh;
+    /* 原本是 height: 100vh; 會被卡得太死 */
+    min-height: 100vh;
     padding: 14px 14px 14px;
     display: flex;
     flex-direction: column;
@@ -862,16 +864,17 @@ h1 {
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
     gap: 18px;
     align-items: stretch;
-    overflow: hidden;
+    /* ❌ 這個 hidden 會讓左邊被「切掉」，改成 visible */
+    overflow: visible;
   }
 
   .left-pane,
   .map-panel {
     height: 100%;
-    overflow: hidden;
+    overflow: visible; /* 交給外層 body 處理捲動就好 */
   }
 
-  /* 左邊整欄變成一張大卡，跟右邊 style 一致 */
+  /* 左邊整欄外框卡片風格 */
   .left-pane {
     display: flex;
     flex-direction: column;
@@ -882,11 +885,11 @@ h1 {
     padding: 12px 14px 10px;
   }
 
-  /* 天氣卡撐滿剩餘空間 */
+  /* 讓 #weather 撐開剩餘空間 */
   .left-pane > #weather {
     flex: 1;
   }
-}  /* 👈 一定要有這個大括號，後面的就不會被吃進來 */
+}  /* ⬅️ 這個大括號一定要存在，代表 @media 的結尾 */
 
 /* ===== 資料來源說明（桌機＋手機共用基礎）===== */
 .source-note {
