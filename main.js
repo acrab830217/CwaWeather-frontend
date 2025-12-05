@@ -1,7 +1,8 @@
 const API_BASE =
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000"                      // 自己本機測
-    : "https://weather-acrab830217.zeabur.app";       // GitHub Pages / 手機
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000"                      // 本機開發
+    : "https://weather-acrab830217.zeabur.app";    // Zeabur 後端（正式）
 const DEFAULT_CITY = "臺北市";
 
 let hasShownModal = false;
