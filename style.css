@@ -259,6 +259,27 @@ h1 {
   flex-wrap: wrap;
 }
 
+/* 手機版：三顆按鈕維持同一行排列 */
+@media (max-width: 480px) {
+  .controls {
+    gap: 8px;
+    flex-wrap: nowrap;      /* ✅ 不要換行 */
+  }
+
+  .controls label {
+    font-size: 13px;
+    flex: 0 0 auto;
+  }
+
+  #citySelect,
+  .date-badge,
+  .share-btn {
+    flex: 0 0 auto;         /* 固定寬度，避免拉長佔滿 */
+    font-size: 13px;
+    padding: 6px 10px;      /* ✅ 比桌機版稍微瘦一點 */
+  }
+}
+
 /* 共同的 pill 風格（日期＋分享共用） */
 .pill-button {
   border-radius: 999px;
@@ -656,7 +677,14 @@ h1 {
 .modal-title {
   font-size: 18px;
   font-weight: 800;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-title .emoji {
+  font-size: 22px;
 }
 
 .modal-text {
@@ -683,19 +711,6 @@ h1 {
   color: #111827;
   padding: 0;
   line-height: 1;
-}
-
-.modal-title {
-  font-size: 18px;
-  font-weight: 800;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.modal-title .emoji {
-  font-size: 22px;
 }
 
 .modal-text {

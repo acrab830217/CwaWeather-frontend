@@ -328,12 +328,11 @@ function renderWeather(data) {
     return;
   }
 
-  const forecasts = data.forecasts.slice(0, 3);
+  const forecasts = data.forecasts.slice(0, 3); // 只顯示前 3 筆
   const now = new Date();
 
   let html = `
     <div class="city">${data.city}</div>
-    <!-- ✅ 資料描述改成固定文字 -->
     <div class="meta">資料描述：未來三十六小時天氣預報</div>
     <ul class="forecast-list">
   `;
@@ -344,20 +343,17 @@ function renderWeather(data) {
     const isCurrent = now >= start && now < end;
 
     const line1 = `時段：${formatTimeRange(f.startTime, f.endTime)}`;
-    const line2 = `天氣：${f.weather} ｜ 氣溫：${f.minTemp} ｜ ${f.maxTemp} ｜ 降雨：${f.rain} ｜ 體感：${f.comfort}`;
+    const line2 = `天氣：${f.weather} ｜ 氣溫：${f.minTemp} - ${f.maxTemp} ｜ 降雨：${f.rain} ｜ 體感：${f.comfort}`;
 
     html += `
       <li class="forecast-item ${isCurrent ? "current" : ""}">
-        <div class="line1">${line1}${
-      isCurrent ? '<span class="now-badge">NOW</span>' : ""
-    }</div>
+        <div class="line1">${line1}</div>
         <div class="line2">${line2}</div>
       </li>
     `;
   });
 
   html += "</ul>";
-
   weatherEl.innerHTML = html;
 }
 
