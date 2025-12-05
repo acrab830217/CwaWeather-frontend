@@ -308,7 +308,11 @@ function updateTodayBadge() {
   const weekdayNames = ["日", "一", "二", "三", "四", "五", "六"];
   const weekday = weekdayNames[now.getDay()];
 
-  badge.textContent = `📅 今天 ${mm}/${dd}（${weekday}）`;
+  const isNarrow = window.innerWidth <= 400; // 手機較窄的情況
+
+  badge.textContent = isNarrow
+    ? 📅 ${mm}/${dd}（${weekday}）      // 窄螢幕：拿掉「今天」避免換行
+    : `📅 今天 ${mm}/${dd}（${weekday}）`; // 一般寬度：維持原本文案
 }
 
 function formatTimeRange(startStr, endStr) {
@@ -316,6 +320,16 @@ function formatTimeRange(startStr, endStr) {
   const startTime = startStr.slice(11, 16);
   const endTime = endStr.slice(11, 16);
   return `${startTime} ~ ${endTime}`;
+}
+
+// 解析 CWA 時間字串（例如 "2025-12-05 06:00:00"），用本地時間建立 Date
+function parseCwaTime(str) {
+  if (!str) return null;
+  const [datePart, timePart] = str.split(" ");
+  const [y, m, d] = datePart.split("-").map(Number);
+  const [hh, mm, ss] = timePart.split(":").map(Number);
+  // new Date(year, monthIndex, day, hour, minute, second) → 依照瀏覽器所在時區建立本地時間
+  return new Date(y, m - 1, d, hh, mm, ss || 0);
 }
 
 // 畫出 3 筆預報（含 NOW 高亮）
@@ -338,9 +352,10 @@ function renderWeather(data) {
   `;
 
   forecasts.forEach((f) => {
-    const start = new Date(f.startTime.replace(" ", "T"));
-    const end = new Date(f.endTime.replace(" ", "T"));
-    const isCurrent = now >= start && now < end;   // ✅ 只負責決定要不要加 .current
+    // ✅ 用本地時間解析 CWA 時間
+    const start = parseCwaTime(f.startTime);
+    const end = parseCwaTime(f.endTime);
+    const isCurrent = start && end && now >= start && now < end;
 
     const line1 = `時段：${formatTimeRange(f.startTime, f.endTime)}`;
     const line2 = `天氣：${f.weather} ｜ 氣溫：${f.minTemp} ｜ 降雨：${f.rain} ｜ 體感：${f.comfort}`;
@@ -354,7 +369,6 @@ function renderWeather(data) {
   });
 
   html += "</ul>";
-
   weatherEl.innerHTML = html;
 }
 
