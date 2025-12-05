@@ -11,11 +11,10 @@
     <link rel="stylesheet" href="style.css" />
 
     <!--  放入這三行開始 -->
-<link rel="icon" type="image/png" href="./icon.png">
-<link rel="apple-touch-icon" href="./icon.png">
-<link rel="apple-touch-icon" sizes="180x180" href="./icon.png">
-<!--  放入這三行結束 -->
-
+    <link rel="icon" type="image/png" href="./icon.png" />
+    <link rel="apple-touch-icon" href="./icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./icon.png" />
+    <!--  放入這三行結束 -->
   </head>
   <body>
     <div class="app-container">
@@ -30,12 +29,28 @@
           <div id="status">正在取得您的位置...</div>
           <div id="location"></div>
 
+          <!-- ✅ 這一塊是縣市 + 日期 + 分享按鈕 -->
           <div class="controls">
-  <label for="citySelect">縣市</label>
-  <select id="citySelect"></select>
+            <label for="citySelect">縣市</label>
+            <select id="citySelect"></select>
 
-  <!-- ✅ 新增：今天日期的小標籤 -->
-  <button type="button" id="dateBadge" class="date-badge" aria-label="今天日期"></button>
+            <!-- 今天日期按鈕 -->
+            <button
+              type="button"
+              id="dateBadge"
+              class="date-badge"
+              aria-label="今天日期"
+            ></button>
+
+            <!-- ✅ 新增：分享按鈕，會放在日期旁邊 -->
+            <button
+              type="button"
+              id="shareBtn"
+              class="btn-share"
+              aria-label="分享今天概況"
+            >
+              分享
+            </button>
           </div>
 
           <div class="hint">
@@ -50,17 +65,25 @@
           <div id="weather" class="card" style="margin-top: 16px;"></div>
 
           <p class="source-note">
-  本頁面所示之天氣預報資料係引用自
-  <a href="https://opendata.cwa.gov.tw/index" target="_blank" rel="noopener noreferrer">
-    中央氣象署-開放資料平臺
-  </a>
-  所提供之開放資料，相關資訊仍以中央氣象署網站公告內容為準。<br>
-  台灣縣市地圖之繪製與邊界資料，參考自
-  <a href="https://www.letswrite.tw/d3-vue-taiwan-map/#html" target="_blank" rel="noopener noreferrer">
-    Let's Write - D3／TopoJSON 台灣地圖教學
-  </a>
-  之示範範例。
-</p>
+            本頁面所示之天氣預報資料係引用自
+            <a
+              href="https://opendata.cwa.gov.tw/index"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              中央氣象署-開放資料平臺
+            </a>
+            所提供之開放資料，相關資訊仍以中央氣象署網站公告內容為準。<br />
+            台灣縣市地圖之繪製與邊界資料，參考自
+            <a
+              href="https://www.letswrite.tw/d3-vue-taiwan-map/#html"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Let's Write - D3／TopoJSON 台灣地圖教學
+            </a>
+            之示範範例。
+          </p>
         </div>
 
         <!-- 右側：台灣地圖（D3 + GeoJSON） -->

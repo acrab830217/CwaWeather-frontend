@@ -120,6 +120,16 @@ window.addEventListener("load", () => {
   const statusEl = document.getElementById("status");
   const locationEl = document.getElementById("location");
   const citySelect = document.getElementById("citySelect");
+  const shareBtn = document.getElementById("shareBtn");
+
+  if (shareBtn) {
+    shareBtn.addEventListener("click", handleShareTodaySummary);
+  }
+
+  initModalEvents();
+  initTaiwanMap();
+  autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
+});
 
   // 填入縣市選項
   citySelect.innerHTML = "";
