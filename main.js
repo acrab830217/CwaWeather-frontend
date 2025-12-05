@@ -328,7 +328,7 @@ function renderWeather(data) {
     return;
   }
 
-  const forecasts = data.forecasts.slice(0, 3); // 只顯示前 3 筆
+  const forecasts = data.forecasts.slice(0, 3);
   const now = new Date();
 
   let html = `
@@ -342,6 +342,7 @@ function renderWeather(data) {
     const end = new Date(f.endTime.replace(" ", "T"));
     const isCurrent = now >= start && now < end;
 
+    // ✅ 這裡只放時間，不要加 NOW
     const line1 = `時段：${formatTimeRange(f.startTime, f.endTime)}`;
     const line2 = `天氣：${f.weather} ｜ 氣溫：${f.minTemp} - ${f.maxTemp} ｜ 降雨：${f.rain} ｜ 體感：${f.comfort}`;
 

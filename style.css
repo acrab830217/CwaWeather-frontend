@@ -259,24 +259,35 @@ h1 {
   flex-wrap: wrap;
 }
 
-/* 手機版：三顆按鈕維持同一行排列 */
+/* 手機版：三顆按鈕同一排，大小比較一致、不會撞到邊緣 */
 @media (max-width: 480px) {
   .controls {
     gap: 8px;
-    flex-wrap: nowrap;      /* ✅ 不要換行 */
+    flex-wrap: nowrap;         /* ✅ 不要換行 */
   }
 
   .controls label {
     font-size: 13px;
     flex: 0 0 auto;
+    margin-right: 2px;
   }
 
+  /* 三顆都吃一樣的高度與字級 */
   #citySelect,
   .date-badge,
   .share-btn {
-    flex: 0 0 auto;         /* 固定寬度，避免拉長佔滿 */
-    font-size: 13px;
-    padding: 6px 10px;      /* ✅ 比桌機版稍微瘦一點 */
+    flex: 1 1 0;               /* ✅ 平均分配寬度，比較整齊 */
+    font-size: 14px;
+    padding: 6px 8px;
+    white-space: nowrap;       /* 不要自動換行，避免高度暴增 */
+  }
+
+  /* 下拉式選單本身的樣式（讓它看起來和 pill 一致） */
+  #citySelect {
+    border-radius: 999px;
+    border: 2px solid #111827;
+    box-shadow: 0 4px 0 #111827;
+    background-color: #ffffff;
   }
 }
 
@@ -452,14 +463,28 @@ h1 {
 }
 
 /* ✅ 現在時間所在時段：用色塊＋NOW 標籤強調 */
+.forecast-item {
+  position: relative;
+  /* 你原本的 padding / border-radius / background ... */
+}
+
 .forecast-item.current {
-  border-color: #111827;
-  background: linear-gradient(
-    135deg,
-    rgba(253, 224, 71, 0.35),
-    rgba(34, 199, 184, 0.4)
-  );
-  box-shadow: 0 2px 0 rgba(15, 23, 42, 0.45);
+  /* ✅ 當前時段的漸層底色 */
+  background: linear-gradient(90deg, #fef9c3, #a7f3d0);
+}
+
+/* ✅ 右上角的 NOW 色塊標籤 */
+.forecast-item.current::after {
+  content: "NOW";
+  position: absolute;
+  right: 18px;
+  top: 10px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background-color: #111827;
+  color: #ffffff;
+  font-size: 11px;
+  letter-spacing: 0.12em;
 }
 
 /* 左側彩色條 */
@@ -476,23 +501,6 @@ h1 {
     #f97316,
     #ec4899
   );
-}
-
-/* 右上角 NOW 標籤 */
-.forecast-item.current::before {
-  content: "NOW";
-  position: absolute;
-  top: -8px;
-  right: 12px;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background-color: #111827;
-  color: #f9fafb;
-  box-shadow: 0 2px 0 rgba(15, 23, 42, 0.7);
 }
 
 .error {
