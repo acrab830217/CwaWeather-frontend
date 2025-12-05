@@ -20,39 +20,40 @@
     <div class="app-container">
       <div class="layout">
         <!-- 左側：控制＋天氣資訊 -->
-        <div class="header-card">
-  <h1>目前地點天氣</h1>
-  <div class="subtitle">
-    自動偵測你目前位置，抓出距離最近的縣市，幫你查 36 小時內的天氣預報。
-  </div>
-</div>
+        <div class="left-pane">
+          <div class="header-card">
+            <h1>目前地點天氣</h1>
+            <div class="subtitle">
+              自動偵測你目前位置，抓出距離最近的縣市，幫你查 36 小時內的天氣預報。
+            </div>
+          </div>
 
           <div id="status">正在取得您的位置...</div>
           <div id="location"></div>
 
-          <!-- ✅ 這一塊是縣市 + 日期 + 分享按鈕 -->
+          <!-- 縣市 + 日期 + 分享按鈕 -->
           <div class="controls">
-  <label for="citySelect">縣市</label>
-  <select id="citySelect"></select>
+            <label for="citySelect">縣市</label>
+            <select id="citySelect"></select>
 
-  <!-- 今天日期的小標籤 -->
-  <button
-    type="button"
-    id="dateBadge"
-    class="pill-button pill-secondary date-badge"
-    aria-label="今天日期"
-  ></button>
+            <!-- 今天日期的小標籤 -->
+            <button
+              type="button"
+              id="dateBadge"
+              class="pill-button pill-secondary date-badge"
+              aria-label="今天日期"
+            ></button>
 
-  <!-- ✅ 新增：分享按鈕（風格跟日期一樣） -->
-  <button
-    type="button"
-    id="shareButton"
-    class="pill-button pill-secondary share-btn"
-    aria-label="分享今天的天氣概況"
-  >
-    📤 分享
-  </button>
-</div>
+            <!-- 分享按鈕 -->
+            <button
+              type="button"
+              id="shareButton"
+              class="pill-button pill-secondary share-btn"
+              aria-label="分享今天的天氣概況"
+            >
+              📤 分享
+            </button>
+          </div>
 
           <div class="hint">
             預設會用你的定位找最近的縣市，你也可以自己改選上方縣市下拉選單，
