@@ -1,11 +1,13 @@
 const API_BASE =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
-    ? "http://localhost:3000"                      // 本機開發
-    : "https://weather-acrab830217.zeabur.app";    // Zeabur 後端（正式）
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000" // 本機測試
+    : "https://weather-acrab830217.zeabur.app"; // 線上後端（注意：不要有結尾的 /）
+
 const DEFAULT_CITY = "臺北市";
 
 let hasShownModal = false;
+// ✅ 用來存今天概況，給分享按鈕使用
+let latestSummaryForShare = null;
 
 // GeoJSON 縣市名稱 -> CWA 名稱
 function normalizeCountyName(name) {
@@ -66,26 +68,7 @@ function getComfortCuteText(comfort) {
   return "今天的天氣有自己的個性，照自己的步調，好好過一天吧 🌈";
 }
 
-// 天氣描述 -> 小 icon
-function getWeatherIcon(weatherText = "") {
-  if (!weatherText) return "🌈";
-
-  if (weatherText.includes("雷")) return "⛈️";
-  if (weatherText.includes("雪")) return "🌨️";
-
-  if (weatherText.includes("雨")) {
-    if (weatherText.includes("陣")) return "🌦️";
-    return "🌧️";
-  }
-
-  if (weatherText.includes("陰")) return "☁️";
-  if (weatherText.includes("多雲")) return "⛅";
-  if (weatherText.includes("晴")) return "☀️";
-
-  return "🌤️";
-}
-
-// 背景主題：依時間切換白天/夜間
+// 背景主題：依時間切換白天/夜間/清晨/黃昏
 function applyBackgroundTheme() {
   const hour = new Date().getHours();
   const body = document.body;
@@ -113,25 +96,16 @@ function applyBackgroundTheme() {
 const countyNameToIdMap = {};
 
 window.addEventListener("load", () => {
-  applyBackgroundTheme();  // 依時間套主題
+  applyBackgroundTheme();
   setInterval(applyBackgroundTheme, 30 * 60 * 1000); // 30 分鐘檢查一次
-  updateTodayBadge();      // ✅ 設定今天日期顯示
+  updateTodayBadge();
 
   const statusEl = document.getElementById("status");
   const locationEl = document.getElementById("location");
   const citySelect = document.getElementById("citySelect");
-  const shareBtn = document.getElementById("shareBtn");
+  const shareBtn = document.getElementById("shareButton");
 
-  if (shareBtn) {
-    shareBtn.addEventListener("click", handleShareTodaySummary);
-  }
-
-  initModalEvents();
-  initTaiwanMap();
-  autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
-});
-
-  // 填入縣市選項
+  // 下拉選單塞入縣市
   citySelect.innerHTML = "";
   CITY_COORDS.forEach((c) => {
     const opt = document.createElement("option");
@@ -152,9 +126,66 @@ window.addEventListener("load", () => {
     fetchWeatherByCity(city);
   });
 
+  // ✅ 分享按鈕事件
+  if (shareBtn) {
+    shareBtn.addEventListener("click", handleShareClick);
+  }
+
   // 自動偵測最近縣市
   autoDetectCityWithGeolocation(statusEl, locationEl, citySelect);
 });
+
+// 分享按鈕邏輯
+function handleShareClick() {
+  if (!latestSummaryForShare) {
+    alert("還在載入今天的天氣，請稍候一下喔！");
+    return;
+  }
+
+  const { city, line, cuteText } = latestSummaryForShare;
+
+  const shareText =
+    `【${city} 今天天氣】\n` +
+    `${line}\n\n` +
+    `${cuteText}\n\n` +
+    "（來自「即時天氣小工具」）";
+
+  // 手機支援 Web Share API
+  if (navigator.share) {
+    navigator
+      .share({
+        title: `${city} 今天天氣`,
+        text: shareText,
+        url: window.location.href,
+      })
+      .catch((err) => {
+        // 使用者取消就不用理他
+        console.log("share canceled or failed:", err);
+      });
+    return;
+  }
+
+  // 一般桌機：複製到剪貼簿
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard
+      .writeText(shareText)
+      .then(() => {
+        alert("已複製今天天氣概況，可以貼到社群或聊天視窗囉！");
+      })
+      .catch(() => {
+        alert("複製失敗，請稍後再試。");
+      });
+  } else {
+    // 最保險的備案：建立暫時 textarea
+    const textarea = document.createElement("textarea");
+    textarea.value = shareText;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+    alert("已複製今天天氣概況，可以貼到社群或聊天視窗囉！");
+  }
+}
 
 // 自動偵測＋最近縣市
 function autoDetectCityWithGeolocation(statusEl, locationEl, citySelect) {
@@ -297,34 +328,32 @@ function renderWeather(data) {
     return;
   }
 
-  const forecasts = data.forecasts.slice(0, 3); // 只顯示前 3 筆
+  const forecasts = data.forecasts.slice(0, 3);
   const now = new Date();
 
   let html = `
-  <div class="city">${data.city}</div>
-  <div class="meta">資料描述：未來三十六小時天氣預報</div>
-  <ul class="forecast-list">
-`;
+    <div class="city">${data.city}</div>
+    <!-- ✅ 資料描述改成固定文字 -->
+    <div class="meta">資料描述：未來三十六小時天氣預報</div>
+    <ul class="forecast-list">
+  `;
 
   forecasts.forEach((f) => {
-    // 用 start / end 判斷現在時間在哪一段
     const start = new Date(f.startTime.replace(" ", "T"));
     const end = new Date(f.endTime.replace(" ", "T"));
     const isCurrent = now >= start && now < end;
 
-const icon = getWeatherIcon(f.weather);
-const line1 = `時段：${formatTimeRange(f.startTime, f.endTime)}`;
-const line2 = `天氣：${f.weather} ｜ 氣溫：${f.minTemp} - ${f.maxTemp} ｜ 降雨：${f.rain} ｜ 體感：${f.comfort}`;
+    const line1 = `時段：${formatTimeRange(f.startTime, f.endTime)}`;
+    const line2 = `天氣：${f.weather} ｜ 氣溫：${f.minTemp} ｜ ${f.maxTemp} ｜ 降雨：${f.rain} ｜ 體感：${f.comfort}`;
 
-html += `
-  <li class="forecast-item ${isCurrent ? "current" : ""}">
-    <div class="line1">
-      <span class="weather-icon">${icon}</span>
-      <span>${line1}</span>
-    </div>
-    <div class="line2">${line2}</div>
-  </li>
-`;
+    html += `
+      <li class="forecast-item ${isCurrent ? "current" : ""}">
+        <div class="line1">${line1}${
+      isCurrent ? '<span class="now-badge">NOW</span>' : ""
+    }</div>
+        <div class="line2">${line2}</div>
+      </li>
+    `;
   });
 
   html += "</ul>";
@@ -339,22 +368,25 @@ function updateTodaySummary(data) {
   }
 
   const first = data.forecasts[0];
-  const icon = getWeatherIcon(first.weather);   // ✅ 新增
   const summaryCard = document.getElementById("summaryCard");
   if (!summaryCard) return;
 
   const baseLine = `${data.city}：${first.weather}，氣溫 ${first.minTemp} – ${first.maxTemp}，降雨機率 ${first.rain}，舒適度 ${first.comfort}`;
   const cuteText = getComfortCuteText(first.comfort);
 
-summaryCard.innerHTML = `
-  <div class="summary-title">今天概況重點</div>
-  <div class="summary-main">
-    <p>
-      <span class="summary-icon">${icon}</span>
-      <span>${baseLine}</span>
-    </p>
-  </div>
-`;
+  // ✅ 記錄今天概況給分享按鈕用
+  latestSummaryForShare = {
+    city: data.city,
+    line: baseLine,
+    cuteText,
+  };
+
+  summaryCard.innerHTML = `
+    <div class="summary-title">今天概況重點</div>
+    <div class="summary-main">
+      <p>${baseLine}</p>
+    </div>
+  `;
   summaryCard.classList.remove("hidden");
 
   if (!hasShownModal) {
@@ -362,16 +394,10 @@ summaryCard.innerHTML = `
     const modalContent = document.getElementById("modalContent");
     if (modal && modalContent) {
       modalContent.innerHTML = `
-  <p>目前偵測到你所在位置為 <strong>${data.city}</strong>。</p>
-  <p>
-    <span class="summary-icon">${icon}</span>
-    這個時段的預報是：<strong>${first.weather}</strong>，
-    氣溫約 <strong>${first.minTemp} – ${first.maxTemp}</strong>，
-    降雨機率 <strong>${first.rain}</strong>，
-    體感 <strong>${first.comfort}</strong>。
-  </p>
-  <p class="modal-cute-text">${cuteText}</p>
-`;
+        <p>目前偵測到你所在位置為 <strong>${data.city}</strong>。</p>
+        <p>這個時段的預報是：<strong>${first.weather}</strong>，氣溫約 <strong>${first.minTemp} – ${first.maxTemp}</strong>，降雨機率 <strong>${first.rain}</strong>，體感 <strong>${first.comfort}</strong>。</p>
+        <p class="modal-cute-text">${cuteText}</p>
+      `;
       modal.classList.add("show");
       hasShownModal = true;
     }
@@ -405,7 +431,6 @@ function initTaiwanMap() {
 
   const svg = d3.select("#taiwanSvg");
 
-  // 讀取容器實際尺寸（右側長形卡片）
   const rect = mapBox.getBoundingClientRect();
   const width = rect.width || 320;
   const height = rect.height || 260;
