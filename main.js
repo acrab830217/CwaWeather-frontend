@@ -66,6 +66,25 @@ function getComfortCuteText(comfort) {
   return "今天的天氣有自己的個性，照自己的步調，好好過一天吧 🌈";
 }
 
+// 天氣描述 -> 小 icon
+function getWeatherIcon(weatherText = "") {
+  if (!weatherText) return "🌈";
+
+  if (weatherText.includes("雷")) return "⛈️";
+  if (weatherText.includes("雪")) return "🌨️";
+
+  if (weatherText.includes("雨")) {
+    if (weatherText.includes("陣")) return "🌦️";
+    return "🌧️";
+  }
+
+  if (weatherText.includes("陰")) return "☁️";
+  if (weatherText.includes("多雲")) return "⛅";
+  if (weatherText.includes("晴")) return "☀️";
+
+  return "🌤️";
+}
+
 // 背景主題：依時間切換白天/夜間
 function applyBackgroundTheme() {
   const hour = new Date().getHours();
