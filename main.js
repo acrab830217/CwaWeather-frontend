@@ -311,8 +311,8 @@ function updateTodayBadge() {
   const isNarrow = window.innerWidth <= 400; // 手機較窄的情況
 
   badge.textContent = isNarrow
-    ? 📅 ${mm}/${dd}（${weekday}）      // 窄螢幕：拿掉「今天」避免換行
-    : `📅 今天 ${mm}/${dd}（${weekday}）`; // 一般寬度：維持原本文案
+    ? `📅 ${mm}/${dd}（${weekday}）`          // 窄螢幕：拿掉「今天」避免換行
+    : `📅 今天 ${mm}/${dd}（${weekday}）`;   // 一般寬度：維持原本文案
 }
 
 window.addEventListener("resize", updateTodayBadge);
