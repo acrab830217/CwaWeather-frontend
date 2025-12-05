@@ -248,7 +248,7 @@ function updateTodayBadge() {
 }
 
 function formatTimeRange(startStr, endStr) {
-  // CWA 時間格式為 "YYYY-MM-DD HH:mm:ss"
+  // CWA 格式 "YYYY-MM-DD HH:mm:ss" -> 只留 HH:mm
   const startTime = startStr.slice(11, 16);
   const endTime = endStr.slice(11, 16);
   return `${startTime} ~ ${endTime}`;
@@ -264,7 +264,7 @@ function renderWeather(data) {
     return;
   }
 
-  const forecasts = data.forecasts.slice(0, 3); // ✅ 保留 3 筆
+  const forecasts = data.forecasts.slice(0, 3); // 只顯示前 3 筆
   const now = new Date();
 
   let html = `
@@ -274,6 +274,7 @@ function renderWeather(data) {
   `;
 
   forecasts.forEach((f) => {
+    // 用 start / end 判斷現在時間在哪一段
     const start = new Date(f.startTime.replace(" ", "T"));
     const end = new Date(f.endTime.replace(" ", "T"));
     const isCurrent = now >= start && now < end;

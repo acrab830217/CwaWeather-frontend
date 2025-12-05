@@ -329,8 +329,8 @@ h1 {
 
 .forecast-item {
   border-radius: 10px;
-  padding: 6px 8px;
-  margin-bottom: 4px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
   background-color: #f9fafb;
   border: 1px solid #e5e7eb;
   position: relative;
@@ -339,38 +339,56 @@ h1 {
 .forecast-item .line1 {
   font-size: 11px;
   font-weight: 600;
-  margin-bottom: 1px;
+  margin-bottom: 2px;
 }
 
 .forecast-item .line2 {
   font-size: 11px;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
-/* 高亮目前時間區間 */
+/* ✅ 現在時間所在時段：用色塊＋NOW 標籤強調 */
 .forecast-item.current {
   border-color: #111827;
   background: linear-gradient(
     135deg,
-    rgba(253, 224, 71, 0.32),
-    rgba(34, 199, 184, 0.38)
+    rgba(253, 224, 71, 0.35),
+    rgba(34, 199, 184, 0.4)
   );
-  box-shadow: 0 2px 0 rgba(15, 23, 42, 0.5);
+  box-shadow: 0 2px 0 rgba(15, 23, 42, 0.45);
 }
 
+/* 左側彩色條 */
+.forecast-item.current::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 4px;
+  border-radius: 4px;
+  background: linear-gradient(
+    180deg,
+    #f97316,
+    #ec4899
+  );
+}
+
+/* 右上角 NOW 標籤 */
 .forecast-item.current::before {
   content: "NOW";
   position: absolute;
-  top: -7px;
-  right: 10px;
-  font-size: 8px;
+  top: -8px;
+  right: 12px;
+  font-size: 9px;
   font-weight: 800;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 999px;
   background-color: #111827;
   color: #f9fafb;
+  box-shadow: 0 2px 0 rgba(15, 23, 42, 0.7);
 }
 
 .error {
@@ -671,12 +689,14 @@ h1 {
     flex: 1;
   }
 
-/* ===== 資料來源說明 ===== */
+/* ===== 資料來源說明（放在左欄下方） ===== */
 .source-note {
-  margin-top: 12px;
-  font-size: 11px;
+  margin-top: 16px;              /* 與上方卡片拉開一點 */
+  margin-bottom: 4px;
+  font-size: 12px;               /* ✅ 字放大一點 */
   color: var(--text-muted);
-  line-height: 1.6;
+  line-height: 1.8;              /* ✅ 行距更舒適 */
+  max-width: 720px;              /* 避免一行太長，增加閱讀性 */
 }
 
 .source-note a {
